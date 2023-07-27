@@ -1,19 +1,24 @@
 import 'package:attedancebeta/color/color_const.dart';
+import 'package:attedancebeta/state/state_manage.dart';
 import 'package:attedancebeta/widget_control/button_control.dart';
 import 'package:attedancebeta/widget_control/form_control.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
+    StateManage statemanage = StateManage();
   final _controlemail = TextEditingController();
+  final _controlpassword = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final watchit = ref.watch(statemanage.statepage);
     final size = MediaQuery.sizeOf(context);
     return SingleChildScrollView(
       child: Container(
@@ -120,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                               widths: size.width * 0.85,
                               heights: size.height * 0.098,
                               hint: 'password...',
-                              controlit: _controlemail,
+                              controlit: _controlpassword,
                               icon: Icons.password_sharp),
                         ],
                       ),
@@ -132,11 +137,15 @@ class _LoginPageState extends State<LoginPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            TextButton(onPressed: (){
-
-                            }, child: const Text('Dont have an account', style: TextStyle(
-                              fontStyle: FontStyle.normal
-                            ),))
+                            TextButton(
+                                onPressed: () {
+                                  ref.read(stateauth.notifier).update((state) => 1);
+                                  print(watchit);
+                                },
+                                child: const Text(
+                                  'Dont have an account',
+                                  style: TextStyle(fontStyle: FontStyle.normal),
+                                ))
                           ],
                         ),
                       ),
@@ -145,8 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                           colorbg: ColorUse.colorBf,
                           heights: size.height * 0.075,
                           text: 'SignIn',
-                          action: (){
-                          },
+                          action: () {},
                           size: size)
                     ],
                   ),
