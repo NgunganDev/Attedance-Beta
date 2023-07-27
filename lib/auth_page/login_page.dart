@@ -141,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       ButtonControl(
-                          widths: size.width * 0.85,
+                          widths: size.width * 0.83,
                           colorbg: ColorUse.colorBf,
                           heights: size.height * 0.075,
                           text: 'SignIn',
