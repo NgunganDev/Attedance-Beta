@@ -146,7 +146,6 @@ class _LoginPageState extends State<LoginPage> {
                           heights: size.height * 0.075,
                           text: 'SignIn',
                           action: (){
-
                           },
                           size: size)
                     ],
