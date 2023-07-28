@@ -30,7 +30,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   void initState() {
-    // user = FirebaseAuth.instance.currentUser!;
+    user = FirebaseAuth.instance.currentUser!;
     super.initState();
      if(user != null ){
       print('ada user');
