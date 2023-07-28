@@ -1,10 +1,13 @@
+import 'package:attedancebeta/all_method/method_firebase.dart';
 import 'package:attedancebeta/color/color_const.dart';
 import 'package:attedancebeta/state/state_manage.dart';
 import 'package:attedancebeta/widget_control/button_control.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
+import '../model_db/hive_model.dart';
 import '../widget_control/form_control.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
@@ -19,9 +22,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _controlemails = TextEditingController();
   final _controlpasswords = TextEditingController();
   final items = ['Admin', 'User'];
-  String? selectedValue;
+  final items2 = ['Instansi 1', 'Instansi 2', 'Instansi 3'];
+  String? type;
+  String? selectedValue2;
+  final _method = MethodFirebase();
+  // var box = Hive.box<Dbmodel>('boxname');
+  @override
+  void dispose() {
+    super.dispose();
+    _controlemails.dispose();
+    _controlpasswords.dispose();
+    _controluser.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    var box = Hive.box<Dbmodel>('boxname');
     final size = MediaQuery.sizeOf(context);
     return SingleChildScrollView(
       child: Container(
@@ -69,7 +85,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       color: ColorUse.colorAf,
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(30),
@@ -108,10 +124,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                           ),
                                         ))
                                     .toList(),
-                                value: selectedValue,
+                                value: type,
                                 onChanged: (String? value) {
                                   setState(() {
-                                    selectedValue = value;
+                                    type = value;
                                   });
                                 },
                                 buttonStyleData: ButtonStyleData(
@@ -132,13 +148,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               child: DropdownButton2<String>(
                                 isExpanded: true,
                                 hint: Text(
-                                  'Select Item',
+                                  'Instansi',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Theme.of(context).hintColor,
                                   ),
                                 ),
-                                items: items
+                                items: items2
                                     .map((String item) =>
                                         DropdownMenuItem<String>(
                                           value: item,
@@ -150,10 +166,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                           ),
                                         ))
                                     .toList(),
-                                value: selectedValue,
+                                value: selectedValue2,
                                 onChanged: (String? value) {
                                   setState(() {
-                                    selectedValue = value;
+                                    selectedValue2 = value;
                                   });
                                 },
                                 buttonStyleData: ButtonStyleData(
@@ -171,6 +187,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             ),
                           ],
                         ),
+                      ),
+                      SizedBox(
+                        height: size.height * 0.015,
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,9 +266,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            TextButton(onPressed: (){
-                              ref.read(stateauth.notifier).update((state) => 0);
-                            }, child: Text('Already Have an Account'))
+                            TextButton(
+                                onPressed: () {
+                                  ref
+                                      .read(stateauth.notifier)
+                                      .update((state) => 0);
+                                },
+                                child: Text('Already Have an Account'))
                           ],
                         ),
                       ),
@@ -258,8 +281,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           colorbg: ColorUse.colorBf,
                           heights: size.height * 0.08,
                           text: 'SignUp',
-                          action: (){
-
+                          action: () async {
+                             box
+                                .add(Dbmodel(instansiName: selectedValue2!));
+                            await _method.signupemail(
+                                _controlemails.text,
+                                _controlpasswords.text,
+                                _controluser.text,
+                                selectedValue2!,
+                                type!);
+                            _controlemails.clear();
+                            _controlpasswords.clear();
+                            _controluser.clear();
                           },
                           size: size)
                     ],

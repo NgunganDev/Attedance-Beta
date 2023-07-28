@@ -1,9 +1,16 @@
+import 'package:attedancebeta/all_method/method_firebase.dart';
 import 'package:attedancebeta/color/color_const.dart';
+import 'package:attedancebeta/routed/final_routed.dart';
 import 'package:attedancebeta/state/state_manage.dart';
 import 'package:attedancebeta/widget_control/button_control.dart';
 import 'package:attedancebeta/widget_control/form_control.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+import '../model_db/hive_model.dart';
+// import 'package:hive/hive.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -13,9 +20,27 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-    StateManage statemanage = StateManage();
+  StateManage statemanage = StateManage();
+  final _method = MethodFirebase();
   final _controlemail = TextEditingController();
   final _controlpassword = TextEditingController();
+  final _controlinstansi = TextEditingController();
+  User? user;
+  Box box = Hive.box<Dbmodel>('boxname');
+
+  @override
+  void initState() {
+    // user = FirebaseAuth.instance.currentUser!;
+    super.initState();
+     if(user != null ){
+      print('ada user');
+      Future.delayed(const Duration(seconds: 1), (){
+         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const FinalRouted()));
+      });
+      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const FinalRouted()));
+     }
+  }
+
   @override
   Widget build(BuildContext context) {
     final watchit = ref.watch(statemanage.statepage);
@@ -47,12 +72,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       SizedBox(
                         height: size.height * 0.05,
                       ),
-                      Text(
-                        'Login',
-                        style: TextStyle(
-                            fontSize: size.height * 0.055,
-                            fontWeight: FontWeight.w600,
-                            color: ColorUse.colorText),
+                      InkWell(
+                        onTap: () async {
+                          print(box.length);
+                        },
+                        child: Text(
+                          'Login',
+                          style: TextStyle(
+                              fontSize: size.height * 0.055,
+                              fontWeight: FontWeight.w600,
+                              color: ColorUse.colorText),
+                        ),
                       ),
                       Text(
                         'Hi Welcome Back',
@@ -90,7 +120,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           Text(
                             'Email',
                             style: TextStyle(
-                                fontSize: size.height * 0.03,
+                                fontSize: size.height * 0.02,
                                 fontWeight: FontWeight.w600),
                           ),
                           SizedBox(
@@ -114,7 +144,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           Text(
                             'Password',
                             style: TextStyle(
-                                fontSize: size.height * 0.03,
+                                fontSize: size.height * 0.02,
                                 fontWeight: FontWeight.w600),
                           ),
                           SizedBox(
@@ -129,6 +159,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               icon: Icons.password_sharp),
                         ],
                       ),
+                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Instansi',
+                            style: TextStyle(
+                                fontSize: size.height * 0.02,
+                                fontWeight: FontWeight.w600),
+                          ),
+                          SizedBox(
+                            height: size.height * 0.01,
+                          ),
+                          FormControl(
+                              colors: ColorUse.colorText,
+                              widths: size.width * 0.85,
+                              heights: size.height * 0.098,
+                              hint: 'instansi',
+                              controlit: _controlinstansi,
+                              icon: Icons.password_sharp),
+                        ],
+                      ),
                       SizedBox(
                         height: size.height * 0.02,
                       ),
@@ -139,7 +190,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           children: [
                             TextButton(
                                 onPressed: () {
-                                  ref.read(stateauth.notifier).update((state) => 1);
+                                  ref
+                                      .read(stateauth.notifier)
+                                      .update((state) => 1);
                                   print(watchit);
                                 },
                                 child: const Text(
@@ -154,7 +207,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           colorbg: ColorUse.colorBf,
                           heights: size.height * 0.075,
                           text: 'SignIn',
-                          action: () {},
+                          action: () async {
+                            await _method.signinemail(_controlemail.text,
+                                _controlpassword.text, context);
+                                await box.put(0, Dbmodel(instansiName: _controlinstansi.text));
+                                _controlemail.clear();
+                                _controlpassword.clear();
+                                _controlinstansi.clear();
+                          },
                           size: size)
                     ],
                   ),
