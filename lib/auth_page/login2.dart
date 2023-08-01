@@ -1,59 +1,51 @@
-import 'package:attedancebeta/all_method/method_firebase.dart';
-import 'package:attedancebeta/color/color_const.dart';
-import 'package:attedancebeta/routed/final_routed.dart';
 import 'package:attedancebeta/state/state_manage.dart';
-import 'package:attedancebeta/widget_control/button_control.dart';
-import 'package:attedancebeta/widget_control/form_control.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
+import '../all_method/method_firebase.dart';
+import '../color/color_const.dart';
 import '../model_db/hive_model.dart';
-// import 'package:hive/hive.dart';
+import '../routed/final_routed.dart';
+import '../widget_control/button_control.dart';
+import '../widget_control/form_control.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+class LoginDendam extends ConsumerStatefulWidget {
+  const LoginDendam({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginDendam> createState() => _LoginDendamState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
-  StateManage statemanage = StateManage();
-  final _method = MethodFirebase();
-  final _controlemail = TextEditingController();
-  final _controlpassword = TextEditingController();
-  final _controlinstansi = TextEditingController();
+class _LoginDendamState extends ConsumerState<LoginDendam> {
+  var box = Hive.box<Dbmodel>('boxname');
   User? user;
-  Box box = Hive.box<Dbmodel>('boxname');
-
   @override
   void initState() {
-    user = FirebaseAuth.instance.currentUser!;
     super.initState();
-     if(user != null ){
-      print('ada user');
-      Future.delayed(const Duration(seconds: 1), (){
-         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const FinalRouted()));
+    user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const FinalRouted()));
       });
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const FinalRouted()));
-     }
+    }
   }
 
+  
   @override
   Widget build(BuildContext context) {
-    final watchit = ref.watch(statemanage.statepage);
+    final controlem = TextEditingController();
+    final controlins = TextEditingController();
+    final controlpa = TextEditingController();
+     MethodFirebase method = MethodFirebase();
+    // final watchit = ref.watch(stateauth);
     final size = MediaQuery.sizeOf(context);
     return SingleChildScrollView(
       child: Container(
         width: size.width,
         height: size.height,
         decoration: BoxDecoration(color: ColorUse.mainBg),
-        // padding: EdgeInsets.symmetric(
-        //   vertical: size.height * 0.04,
-        //   horizontal: size.width * 0.03,
-        // ),
         child: Stack(
           children: [
             Positioned(
@@ -74,7 +66,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                       InkWell(
                         onTap: () async {
-                          print(box.length);
+                          // print(box.length);
                         },
                         child: Text(
                           'Login',
@@ -131,7 +123,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               widths: size.width * 0.85,
                               heights: size.height * 0.098,
                               hint: 'email...',
-                              controlit: _controlemail,
+                              controlit: controlem,
                               icon: Icons.email_sharp),
                         ],
                       ),
@@ -155,11 +147,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               widths: size.width * 0.85,
                               heights: size.height * 0.098,
                               hint: 'password...',
-                              controlit: _controlpassword,
+                              controlit: controlpa,
                               icon: Icons.password_sharp),
                         ],
                       ),
-                       Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
@@ -176,7 +168,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               widths: size.width * 0.85,
                               heights: size.height * 0.098,
                               hint: 'instansi',
-                              controlit: _controlinstansi,
+                              controlit: controlins,
                               icon: Icons.password_sharp),
                         ],
                       ),
@@ -190,10 +182,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           children: [
                             TextButton(
                                 onPressed: () {
+                                  // print(watchit);
                                   ref
                                       .read(stateauth.notifier)
                                       .update((state) => 1);
-                                  print(watchit);
                                 },
                                 child: const Text(
                                   'Dont have an account',
@@ -208,12 +200,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           heights: size.height * 0.075,
                           text: 'SignIn',
                           action: () async {
-                            await _method.signinemail(_controlemail.text,
-                                _controlpassword.text, context);
-                                await box.put(0, Dbmodel(instansiName: _controlinstansi.text));
-                                _controlemail.clear();
-                                _controlpassword.clear();
-                                _controlinstansi.clear();
+                            method.signinemail(controlem.text,
+                              controlpa.text, context);
+                            await box.put(
+                                0, Dbmodel(instansiName: controlins.text));
+                            controlem.clear();
+                            controlpa.clear();
+                            controlins.clear();
                           },
                           size: size)
                     ],

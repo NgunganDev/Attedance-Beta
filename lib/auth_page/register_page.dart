@@ -25,8 +25,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final items2 = ['Instansi 1', 'Instansi 2', 'Instansi 3'];
   String? type;
   String? selectedValue2;
-  final _method = MethodFirebase();
-  // var box = Hive.box<Dbmodel>('boxname');
+  // final _method = MethodFirebase();
+  var box = Hive.box<Dbmodel>('boxname');
   @override
   void dispose() {
     super.dispose();
@@ -37,7 +37,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    var box = Hive.box<Dbmodel>('boxname');
+    // var box = Hive.box<Dbmodel>('boxname');
     final size = MediaQuery.sizeOf(context);
     return SingleChildScrollView(
       child: Container(
@@ -281,19 +281,20 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           colorbg: ColorUse.colorBf,
                           heights: size.height * 0.08,
                           text: 'SignUp',
-                          action: () async {
-                             box
-                                .add(Dbmodel(instansiName: selectedValue2!));
-                            await _method.signupemail(
-                                _controlemails.text,
-                                _controlpasswords.text,
-                                _controluser.text,
-                                selectedValue2!,
-                                type!);
-                            _controlemails.clear();
-                            _controlpasswords.clear();
-                            _controluser.clear();
-                          },
+                          action: (){},
+                          // action: () async {
+                          //    await box
+                          //       .add(Dbmodel(instansiName: selectedValue2!));
+                          //    _method.signupemail(
+                          //       _controlemails.text,
+                          //       _controlpasswords.text,
+                          //       _controluser.text,
+                          //       selectedValue2!,
+                          //       type!);
+                          //   _controlemails.clear();
+                          //   _controlpasswords.clear();
+                          //   _controluser.clear();
+                          // },
                           size: size)
                     ],
                   ),

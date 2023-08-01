@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class DrawerHeadUser extends StatelessWidget {
   final VoidCallback action;
   final String name;
-  const DrawerHeadUser({super.key, required this.action, required this.name});
+  final String Url;
+  const DrawerHeadUser({super.key, required this.action, required this.name, required this.Url});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class DrawerHeadUser extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: size.height * 0.05,
-            // backgroundColor: ,
+            backgroundImage: NetworkImage(Url),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -26,9 +27,7 @@ class DrawerHeadUser extends StatelessWidget {
               ),
               Text(name),
               IconButton(
-                  onPressed: () {
-                    action;
-                  },
+                  onPressed: action,
                   icon: const Icon(Icons.settings))
             ],
           ),
