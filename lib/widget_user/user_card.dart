@@ -5,11 +5,13 @@ class UserCard extends StatelessWidget {
   final double widths;
   final double heights;
   final String name;
+  final String image;
   const UserCard(
       {super.key,
       required this.heights,
       required this.widths,
-      required this.name});
+      required this.name,
+      required this.image});
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,7 @@ class UserCard extends StatelessWidget {
                   CircleAvatar(
                     radius: size.height * 0.05,
                     backgroundColor: ColorUse.colorBf,
+                    backgroundImage: NetworkImage(image),
                   ),
                   Text(
                     'Active User',
@@ -44,14 +47,14 @@ class UserCard extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
+            SizedBox(
               width: size.width * 0.3,
               height: size.height * 0.15,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    'Jeremy',
+                    name,
                     style: TextStyle(
                         fontSize: size.height * 0.03,
                         fontWeight: FontWeight.w600),

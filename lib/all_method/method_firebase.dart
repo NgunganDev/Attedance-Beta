@@ -89,8 +89,31 @@ class MethodFirebase {
   }
 
   Future<void> addCheckIn(String user, String timestamp, String day) async {
+    await instansiRef.doc(await fetchins()).collection('attedance').add(
+        {"checkIn": timestamp, "checkout": "", "user": user, "timestamp": day});
+    await instansiRef
+        .doc(await fetchins())
+        .collection('users')
+        .doc(user)
+        .collection('atpers')
+        .add({
+      "checkIn": timestamp,
+      "checkout": "",
+      "noattendace": '',
+      "info": '',
+      "user": user,
+      "timestamp": day
+    });
+  }
+
+  Future<void> updatecheckout() async {}
+
+  Future<void> addNon(String timestamp, String user, String day, String non,
+      String info) async {
     await instansiRef.doc(await fetchins()).collection('attedance').add({
       "checkIn": timestamp,
+      "noattendace": non,
+      "info": info,
       "checkout": "",
       "user": user,
       "timestamp": day
@@ -103,6 +126,8 @@ class MethodFirebase {
         .add({
       "checkIn": timestamp,
       "checkout": "",
+      "noattendace": non,
+      "info": info,
       "user": user,
       "timestamp": day
     });

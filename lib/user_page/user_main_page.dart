@@ -4,6 +4,7 @@ import 'package:attedancebeta/drawer_user/drawer_menu.dart';
 import 'package:attedancebeta/popup/show.dart';
 import 'package:attedancebeta/profile/user_profile.dart';
 import 'package:attedancebeta/state/state_manage.dart';
+import 'package:attedancebeta/user_page/user_non.dart';
 import 'package:attedancebeta/widget_user/attedance_card.dart';
 import 'package:attedancebeta/widget_user/user_button.dart';
 import 'package:attedancebeta/widget_user/user_card.dart';
@@ -13,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:lottie/lottie.dart';
 import '../all_method/method_firebase.dart';
 import '../format_parse/format.dart';
 import '../model_db/hive_model.dart';
@@ -33,9 +35,25 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
   Format format = Format();
   ShowPop show = ShowPop();
   User user = FirebaseAuth.instance.currentUser!;
-
+  String? initday;
+  Future<String> caleresString(BuildContext context) async {
+    String pickedDate = '';
+    await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: (DateTime.now()).add(const Duration(days: 7)))
+        .then((value) {
+      pickedDate = Format().formatDate(value!);
+      print(pickedDate);
+    });
+    return pickedDate;
+  }
   @override
   void initState() {
+    setState(() {
+      initday = format.formatDate(DateTime.now());
+    });
     super.initState();
   }
 
@@ -96,6 +114,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                 heights: size.height * 0.2,
                                 widths: size.width * 0.8,
                                 name: data!['username'],
+                                image: data['photoUrl'],
                               );
                             } else {
                               return const Center(
@@ -128,47 +147,81 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                             color: Colors.white),
                         width: size.width * 0.8,
                         height: size.height * 0.15,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        child: Column(
                           children: [
-                            UserChocard(
-                              widths: size.width * 0.2,
-                              heights: size.height * 0.1,
-                              itemName: 'Today',
-                              icon: Icons.calendar_today_sharp,
-                              action: () async {
-                                setState(() {
-                                  picked1 = !picked1;
-                                });
-                                await show.caleresString(context);
-                                picked1 = !picked1;
-                              },
-                              picked: picked1,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              width: size.width,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Categories',
+                                    style: TextStyle(
+                                        fontSize: size.height * 0.02,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  Text(
+                                    'see all',
+                                    style:
+                                        TextStyle(fontSize: size.height * 0.02),
+                                  )
+                                ],
+                              ),
                             ),
-                            UserChocard(
-                                widths: size.width * 0.2,
-                                heights: size.height * 0.1,
-                                itemName: 'History',
-                                icon: Icons.history_edu_sharp,
-                                action: () {
-                                  setState(() {
-                                    picked2 = !picked2;
-                                  });
-                                  // checksame();
-                                },
-                                picked: picked2),
-                            UserChocard(
-                                widths: size.width * 0.2,
-                                heights: size.height * 0.1,
-                                itemName: 'Absent',
-                                icon: Icons.no_accounts_sharp,
-                                action: () {
-                                  setState(() {
-                                    picked2 = !picked2;
-                                  });
-                                  // checksame();
-                                },
-                                picked: picked2)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                UserChocard(
+                                  widths: size.width * 0.2,
+                                  heights: size.height * 0.1,
+                                  itemName: 'Today',
+                                  icon: Icons.calendar_today_sharp,
+                                  action: () async {
+                                    // print(initday);
+                                     await caleresString(context).then((value){
+                                      initday = value;
+                                     } );
+                                    setState(()  {
+                                      picked1 = !picked1;
+                                    });
+                                  },
+                                  picked: picked1,
+                                ),
+                                UserChocard(
+                                    widths: size.width * 0.2,
+                                    heights: size.height * 0.1,
+                                    itemName: 'History',
+                                    icon: Icons.history_edu_sharp,
+                                    action: () {
+                                      setState(() {
+                                        picked2 = !picked2;
+                                      });
+                                      // checksame();
+                                    },
+                                    picked: picked2),
+                                UserChocard(
+                                    widths: size.width * 0.2,
+                                    heights: size.height * 0.1,
+                                    itemName: 'Absent',
+                                    icon: Icons.no_accounts_sharp,
+                                    action: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Usernon(
+                                                    user: user.email!,
+                                                  )));
+                                      setState(() {
+                                        // picked2 = !picked2;
+                                      });
+                                      // checksame();
+                                    },
+                                    picked: picked2)
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -181,22 +234,40 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                 .collection('users')
                                 .doc(user.email!)
                                 .collection('atpers')
-                                .where('timestamp',
-                                    isEqualTo:
-                                        format.formatDate(DateTime.now()))
+                                .where('timestamp', isEqualTo: initday)
                                 .snapshots(),
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
                                 final data = snapshot.data!.docs;
-                                return ListView.builder(
-                                    itemCount: data.length,
-                                    itemBuilder: (_, index) {
-                                      return ListTile(
-                                        title: Text(data[index]['checkIn']),
-                                      );
-                                    });
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: size.height * 0.04,
+                                      horizontal: size.width * 0.04),
+                                  child: ListView.builder(
+                                      itemCount: data.length,
+                                      itemBuilder: (_, index) {
+                                        return data[index]['noattendace'] == ''
+                                            ? AttedanceCard(
+                                                asset: Image.asset(
+                                                  'images/att.png',
+                                                  fit: BoxFit.fitHeight,
+                                                ),
+                                                checkout: data[index]
+                                                    ['checkout'],
+                                                checkin: data[index]['checkIn'],
+                                                time: data[index]['timestamp'])
+                                            : AttedanceCard(
+                                                asset: Lottie.asset(
+                                                    'lottie/nosick.json',
+                                                    fit: BoxFit.cover),
+                                                checkout: data[index]
+                                                    ['noattendace'],
+                                                checkin: data[index]['checkIn'],
+                                                time: data[index]['timestamp']);
+                                      }),
+                                );
                               } else {
-                                return Center(
+                                return const Center(
                                   child: Text('no data'),
                                 );
                               }
@@ -267,7 +338,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                       },
                     );
                   } else {
-                    return const CircularProgressIndicator();
+                    return const Center(child: CircularProgressIndicator());
                   }
                 }),
             const DrawerMenu(
