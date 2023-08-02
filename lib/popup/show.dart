@@ -1,11 +1,14 @@
+import 'package:attedancebeta/color/color_const.dart';
+import 'package:attedancebeta/widget_control/button_control.dart';
+import 'package:attedancebeta/widget_control/form_control.dart';
 import 'package:flutter/material.dart';
 
 import '../format_parse/format.dart';
 
 class ShowPop {
-  String caleresString(BuildContext context)  {
+  String caleresString(BuildContext context) {
     String pickedDate = '';
-     showDatePicker(
+    showDatePicker(
             context: context,
             initialDate: DateTime.now(),
             firstDate: DateTime(2000),
@@ -15,5 +18,59 @@ class ShowPop {
       print(pickedDate);
     });
     return pickedDate;
+  }
+
+  void showUp(BuildContext context, VoidCallback action, String title,
+      TextEditingController controlit, String label) {
+    final size = MediaQuery.sizeOf(context);
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: size.height * 0.2 
+            ),
+            child: AlertDialog(
+              title: Text(title),
+              content: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(size.height * 0.04)
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label),
+                    FormControl(
+                        colors: ColorUse.colorText,
+                        widths: size.width * 0.8,
+                        heights: size.height * 0.08,
+                        hint: 'update bio',
+                        controlit: controlit,
+                        icon: Icons.edit)
+                  ],
+                ),
+              ),
+              actions: [
+                ButtonControl(
+                    widths: size.width * 0.3,
+                    colorbg: ColorUse.colorBf,
+                    heights: size.height * 0.06,
+                    text: 'cancel',
+                    action: () {
+                      Navigator.pop(context);
+                    },
+                    size: size),
+                ButtonControl(
+                    widths: size.width * 0.3,
+                    colorbg: ColorUse.colorBf,
+                    heights: size.height * 0.06,
+                    text: 'update',
+                    action: action,
+                    size: size)
+              ],
+            ),
+          );
+        });
   }
 }

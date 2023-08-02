@@ -82,7 +82,6 @@ class MethodFirebase {
       imgUrl = await referenceImageToUpload.getDownloadURL();
       await updatePicture(imgUrl, ins, user);
       return imgUrl;
-      // if (file == null) return;
     } catch (e) {
       return 'https://cdn.stealthoptional.com/images/ncavvykf/stealth/f60441357c6c210401a1285553f0dcecc4c4489e-564x564.jpg?w=328&h=328&auto=format';
     }
@@ -106,7 +105,30 @@ class MethodFirebase {
     });
   }
 
-  Future<void> updatecheckout() async {}
+  Future<void> updatecheckout(String user, String day, String timeout) async {
+    CollectionReference refdes = instansiRef
+        .doc(await fetchins())
+        .collection('users')
+        .doc(user)
+        .collection('atpers');
+    QuerySnapshot refAtpers = await refdes.where('timestamp', isEqualTo: day).get();
+    for (var docdes in refAtpers.docs) {
+      var upItem = docdes.id;
+      await refdes.doc(upItem).update({
+        "checkout": timeout,
+      }).then((value) {
+        print('success update checkout ');
+      });
+    }
+
+    CollectionReference refAll = instansiRef.doc(await fetchins()).collection('attedance');
+    QuerySnapshot resAll = await refAll.where('timestamp', isEqualTo: day).get();
+    for(var docTo in resAll.docs){
+      refAll.doc(docTo.id).update({
+        "checkout": timeout
+      });
+    }
+  }
 
   Future<void> addNon(String timestamp, String user, String day, String non,
       String info) async {
@@ -130,6 +152,13 @@ class MethodFirebase {
       "info": info,
       "user": user,
       "timestamp": day
+    });
+  }
+  Future<void> updateBioname(String user , String contentbio) async {
+    await instansiRef.doc(await fetchins()).collection('users').doc(user).update({
+      "bio": contentbio,
+    }).then((value) {
+      print('succes update bio');
     });
   }
 }

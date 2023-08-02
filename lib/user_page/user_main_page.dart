@@ -4,6 +4,7 @@ import 'package:attedancebeta/drawer_user/drawer_menu.dart';
 import 'package:attedancebeta/popup/show.dart';
 import 'package:attedancebeta/profile/user_profile.dart';
 import 'package:attedancebeta/state/state_manage.dart';
+import 'package:attedancebeta/user_page/qr_page.dart';
 import 'package:attedancebeta/user_page/user_non.dart';
 import 'package:attedancebeta/widget_user/attedance_card.dart';
 import 'package:attedancebeta/widget_user/user_button.dart';
@@ -49,6 +50,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
     });
     return pickedDate;
   }
+
   @override
   void initState() {
     setState(() {
@@ -145,7 +147,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(18),
                             color: Colors.white),
-                        width: size.width * 0.8,
+                        width: size.width * 0.9,
                         height: size.height * 0.15,
                         child: Column(
                           children: [
@@ -181,10 +183,10 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                   icon: Icons.calendar_today_sharp,
                                   action: () async {
                                     // print(initday);
-                                     await caleresString(context).then((value){
+                                    await caleresString(context).then((value) {
                                       initday = value;
-                                     } );
-                                    setState(()  {
+                                    });
+                                    setState(() {
                                       picked1 = !picked1;
                                     });
                                   },
@@ -219,7 +221,16 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                       });
                                       // checksame();
                                     },
-                                    picked: picked2)
+                                    picked: picked2),
+                                UserChocard(
+                                    widths: size.width * 0.2,
+                                    heights: size.height * 0.1,
+                                    itemName: 'Scan',
+                                    action: (){
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const QrPage()));
+                                    },
+                                    picked: picked2,
+                                    icon: Icons.qr_code_2_outlined)
                               ],
                             ),
                           ],
@@ -296,7 +307,12 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                 ic: Icons.output_outlined,
                                 width: size.width * 0.4,
                                 height: size.height * 0.065,
-                                action: () {},
+                                action: () async {
+                                  await method.updatecheckout(
+                                      user.email!,
+                                      format.formatDate(DateTime.now()),
+                                      format.formatTime(DateTime.now()));
+                                },
                                 colo: ColorUse.colorBf),
                           ],
                         ),

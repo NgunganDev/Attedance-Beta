@@ -33,7 +33,6 @@ class _RoutedState extends ConsumerState<Routed> {
       return const RegisterPage();
     }
   }
-  StateManage statemanage = StateManage();
   @override
   Widget build(BuildContext context) {
      final authpage = ref.watch(stateauth);
