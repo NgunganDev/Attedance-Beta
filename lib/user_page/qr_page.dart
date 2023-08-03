@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -13,22 +15,32 @@ class _QrPageState extends State<QrPage> {
   QRViewController? controller;
   Barcode? resultSc;
   void onqrcreate(QRViewController controller) {
-    controller.scannedDataStream.listen((event) { 
-    setState(() {
-      resultSc = event;
-    });
-    print(resultSc);
+    controller.scannedDataStream.listen((event) {
+      setState(() {
+        resultSc = event;
+      });
     });
   }
+
+   @override
+  void reassemble() {
+    super.reassemble();
+    if (Platform.isAndroid) {
+      controller!.pauseCamera();
+    }
+    controller!.resumeCamera();
+  }
+
   @override
   void dispose() {
     super.dispose();
     controller!.dispose();
   }
+  
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-     return Scaffold(
+    return Scaffold(
       body: Container(
         width: size.width,
         height: size.height,
@@ -41,9 +53,15 @@ class _QrPageState extends State<QrPage> {
               child: QRView(
                 key: qrKey,
                 onQRViewCreated: onqrcreate,
+                overlay: QrScannerOverlayShape(
+                  borderColor: Colors.red,
+                  borderRadius: 10,
+                  borderLength: 30,
+                  borderWidth: 10,
+                ),
               ),
             ),
-            Text(resultSc!.code.toString()),
+            Text(resultSc != null ? resultSc!.code.toString() : 'wait scanning'),
           ],
         ),
       ),

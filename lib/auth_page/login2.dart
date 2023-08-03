@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../all_method/method_firebase.dart';
 import '../color/color_const.dart';
 import '../model_db/hive_model.dart';
+import '../presenter/presenter_three.dart';
 import '../routed/final_routed.dart';
 import '../widget_control/button_control.dart';
 import '../widget_control/form_control.dart';
@@ -18,12 +18,14 @@ class LoginDendam extends ConsumerStatefulWidget {
 }
 
 class _LoginDendamState extends ConsumerState<LoginDendam> {
+  Presenterthree? _present;
   var box = Hive.box<Dbmodel>('boxname');
   User? user;
   @override
   void initState() {
     super.initState();
     user = FirebaseAuth.instance.currentUser;
+    _present = ref.read(presentre);
     if (user != null) {
       Future.delayed(const Duration(seconds: 1), () {
         Navigator.pushReplacement(context,
@@ -32,20 +34,18 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
     }
   }
 
-  
   @override
   Widget build(BuildContext context) {
     final controlem = TextEditingController();
     final controlins = TextEditingController();
     final controlpa = TextEditingController();
-     MethodFirebase method = MethodFirebase();
     // final watchit = ref.watch(stateauth);
     final size = MediaQuery.sizeOf(context);
     return SingleChildScrollView(
       child: Container(
         width: size.width,
         height: size.height,
-        decoration: BoxDecoration(color: ColorUse.mainBg),
+        decoration: const BoxDecoration(color: ColorUse.mainBg),
         child: Stack(
           children: [
             Positioned(
@@ -200,8 +200,8 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
                           heights: size.height * 0.075,
                           text: 'SignIn',
                           action: () async {
-                            method.signinemail(controlem.text,
-                              controlpa.text, context);
+                            await _present!.signin(
+                                controlem.text, controlpa.text, context);
                             await box.put(
                                 0, Dbmodel(instansiName: controlins.text));
                             controlem.clear();

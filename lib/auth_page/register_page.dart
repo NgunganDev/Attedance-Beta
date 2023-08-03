@@ -1,4 +1,3 @@
-import 'package:attedancebeta/all_method/method_firebase.dart';
 import 'package:attedancebeta/color/color_const.dart';
 import 'package:attedancebeta/state/state_manage.dart';
 import 'package:attedancebeta/widget_control/button_control.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../model_db/hive_model.dart';
+import '../presenter/presenter_three.dart';
 import '../widget_control/form_control.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
@@ -18,6 +18,7 @@ class RegisterPage extends ConsumerStatefulWidget {
 }
 
 class _RegisterPageState extends ConsumerState<RegisterPage> {
+  Presenterthree? _present;
   final _controluser = TextEditingController();
   final _controlemails = TextEditingController();
   final _controlpasswords = TextEditingController();
@@ -27,6 +28,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   String? selectedValue2;
   // final _method = MethodFirebase();
   var box = Hive.box<Dbmodel>('boxname');
+
+  @override
+  void initState() {
+    super.initState();
+    _present = ref.read(presentre);
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -271,6 +279,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                   ref
                                       .read(stateauth.notifier)
                                       .update((state) => 0);
+                                      print(box.length);
                                 },
                                 child: Text('Already Have an Account'))
                           ],
@@ -281,7 +290,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           colorbg: ColorUse.colorBf,
                           heights: size.height * 0.08,
                           text: 'SignUp',
-                          action: (){},
+                          action: () async {
+                            await _present!.signup(
+                                _controlemails.text,
+                                _controlpasswords.text,
+                                _controluser.text,
+                                selectedValue2!,
+                                type!, context);
+                                print(box.length);
+                          },
                           // action: () async {
                           //    await box
                           //       .add(Dbmodel(instansiName: selectedValue2!));

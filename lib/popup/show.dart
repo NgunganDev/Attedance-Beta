@@ -2,7 +2,6 @@ import 'package:attedancebeta/color/color_const.dart';
 import 'package:attedancebeta/widget_control/button_control.dart';
 import 'package:attedancebeta/widget_control/form_control.dart';
 import 'package:flutter/material.dart';
-
 import '../format_parse/format.dart';
 
 class ShowPop {
@@ -26,13 +25,12 @@ class ShowPop {
     showDialog(
         context: context,
         builder: (context) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: size.height * 0.2 
-            ),
-            child: AlertDialog(
-              title: Text(title),
-              content: Container(
+          return AlertDialog(
+            title: Text(title),
+            content: SingleChildScrollView(
+              child: Container(
+                width: size.width,
+                height: size.height * 0.2,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(size.height * 0.04)
                 ),
@@ -51,25 +49,25 @@ class ShowPop {
                   ],
                 ),
               ),
-              actions: [
-                ButtonControl(
-                    widths: size.width * 0.3,
-                    colorbg: ColorUse.colorBf,
-                    heights: size.height * 0.06,
-                    text: 'cancel',
-                    action: () {
-                      Navigator.pop(context);
-                    },
-                    size: size),
-                ButtonControl(
-                    widths: size.width * 0.3,
-                    colorbg: ColorUse.colorBf,
-                    heights: size.height * 0.06,
-                    text: 'update',
-                    action: action,
-                    size: size)
-              ],
             ),
+            actions: [
+              ButtonControl(
+                  widths: size.width * 0.3,
+                  colorbg: ColorUse.colorBf,
+                  heights: size.height * 0.06,
+                  text: 'cancel',
+                  action: () {
+                    Navigator.pop(context);
+                  },
+                  size: size),
+              ButtonControl(
+                  widths: size.width * 0.3,
+                  colorbg: ColorUse.colorBf,
+                  heights: size.height * 0.06,
+                  text: 'update',
+                  action: action,
+                  size: size)
+            ],
           );
         });
   }

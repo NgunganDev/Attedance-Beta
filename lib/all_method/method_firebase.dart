@@ -8,33 +8,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
-
 import '../model_db/hive_model.dart';
 
 // perlu maintenance
 class MethodFirebase {
+  CollectionReference instansiRef =
+      FirebaseFirestore.instance.collection('instansi');
+
   Future<String> fetchins() async {
     var box = Hive.box<Dbmodel>('boxname');
     Dbmodel ins = box.getAt(0) ?? Dbmodel(instansiName: 'Instansi 1');
     return ins.instansiName;
   }
 
+  Future<void> addins(String name) async {
+    var box = Hive.box<Dbmodel>('boxname');
+    await box.add(Dbmodel(instansiName: name));
+  }
+
+  Future<void> putins() async {
+
+  }
+
+
   ImagePicker imagepicker = ImagePicker();
-  CollectionReference instansiRef =
-      FirebaseFirestore.instance.collection('instansi');
   Future<void> signupemail(String email, String password, String username,
-      String instansi, String type, String ins) async {
+      String instansi, String type, BuildContext context) async {
     await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password)
-        .then((value) {
-      instansiRef.doc(ins).collection('users').doc(email).set({
+        .then((value) async {
+      instansiRef.doc(instansi).collection('users').doc(email).set({
         "username": username,
         "type": type,
         "instansi": instansi,
         "bio": "",
         "photoUrl": "",
-      }).then((value) {
-        print('success created an user');
+      }).then((value) async {
+       Navigator.push(context, MaterialPageRoute(builder: (context) => const FinalRouted() ));
+        await addins(instansi);
       });
     });
   }
@@ -60,7 +71,7 @@ class MethodFirebase {
 
   Future<void> updatePicture(String photoUrl, String ins, String user) async {
     instansiRef
-        .doc(ins)
+        .doc(await fetchins())
         .collection('users')
         .doc(user)
         .update({"photoUrl": photoUrl}).then((value) {
@@ -111,7 +122,8 @@ class MethodFirebase {
         .collection('users')
         .doc(user)
         .collection('atpers');
-    QuerySnapshot refAtpers = await refdes.where('timestamp', isEqualTo: day).get();
+    QuerySnapshot refAtpers =
+        await refdes.where('timestamp', isEqualTo: day).get();
     for (var docdes in refAtpers.docs) {
       var upItem = docdes.id;
       await refdes.doc(upItem).update({
@@ -121,12 +133,12 @@ class MethodFirebase {
       });
     }
 
-    CollectionReference refAll = instansiRef.doc(await fetchins()).collection('attedance');
-    QuerySnapshot resAll = await refAll.where('timestamp', isEqualTo: day).get();
-    for(var docTo in resAll.docs){
-      refAll.doc(docTo.id).update({
-        "checkout": timeout
-      });
+    CollectionReference refAll =
+        instansiRef.doc(await fetchins()).collection('attedance');
+    QuerySnapshot resAll =
+        await refAll.where('timestamp', isEqualTo: day).get();
+    for (var docTo in resAll.docs) {
+      refAll.doc(docTo.id).update({"checkout": timeout});
     }
   }
 
@@ -154,11 +166,28 @@ class MethodFirebase {
       "timestamp": day
     });
   }
-  Future<void> updateBioname(String user , String contentbio) async {
-    await instansiRef.doc(await fetchins()).collection('users').doc(user).update({
+
+  Future<void> updateBioname(String user, String contentbio) async {
+    await instansiRef
+        .doc(await fetchins())
+        .collection('users')
+        .doc(user)
+        .update({
       "bio": contentbio,
     }).then((value) {
       print('succes update bio');
     });
+  }
+
+  Future<void> updateUsername(String user, String username) async {
+    await instansiRef
+        .doc(await fetchins())
+        .collection('users')
+        .doc(user)
+        .update({
+          "username": username,
+        }).then((value) {
+          print('success update username');
+        });
   }
 }

@@ -1,3 +1,4 @@
+import 'package:attedancebeta/admin_page/admin_main_page.dart';
 import 'package:attedancebeta/model_db/hive_model.dart';
 import 'package:attedancebeta/user_page/user_main_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,7 +15,26 @@ class FinalRouted extends StatefulWidget {
 
 class _FinalRoutedState extends State<FinalRouted> {
   User user = FirebaseAuth.instance.currentUser!;
-  var box = Hive.box<Dbmodel>('boxname');
+//   var box = Hive.box<Dbmodel>('boxname');
+// String fetchin () {
+//   modi = box.getAt(0);
+//   return modi!.instansiName;
+// }
+ var box = Hive.box<Dbmodel>('boxname');
+
+// Future<void> fetchin() async {
+//     var box = Hive.box<Dbmodel>('boxname');
+//     setState(() {
+//       modi =  box.getAt(0);
+//     });
+//     print(box.length);
+// }
+
+  @override
+  void initState() {
+    super.initState();
+    // fetchin();
+  }
   @override
   Widget build(BuildContext context) {
     Dbmodel modi = box.getAt(0)!;
@@ -37,9 +57,12 @@ class _FinalRoutedState extends State<FinalRouted> {
                           builder: (context) => const UserMainPage()));
                 });
               } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+                Future.delayed(const Duration(seconds: 1), () {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AdminMainPage()));
+                });
               }
             } else {
               return const Center(

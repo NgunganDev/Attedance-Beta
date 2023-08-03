@@ -19,7 +19,9 @@ import 'package:lottie/lottie.dart';
 import '../all_method/method_firebase.dart';
 import '../format_parse/format.dart';
 import '../model_db/hive_model.dart';
+import '../presenter/presenter_two.dart';
 
+// menggunakan Presentertwo
 class UserMainPage extends ConsumerStatefulWidget {
   const UserMainPage({super.key});
 
@@ -28,6 +30,8 @@ class UserMainPage extends ConsumerStatefulWidget {
 }
 
 class _UserMainPageState extends ConsumerState<UserMainPage> {
+  Presentertwo? _present;
+  PageController controlpage = PageController();
   String names = '';
   var box = Hive.box<Dbmodel>('boxname');
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
@@ -55,8 +59,15 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
   void initState() {
     setState(() {
       initday = format.formatDate(DateTime.now());
+      _present = ref.read(present2);
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controlpage.dispose();
   }
 
   @override
@@ -201,6 +212,9 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                       setState(() {
                                         picked2 = !picked2;
                                       });
+                                      controlpage.animateToPage(1,
+                                          duration: const Duration(seconds: 1),
+                                          curve: Curves.easeIn);
                                       // checksame();
                                     },
                                     picked: picked2),
@@ -226,8 +240,12 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                     widths: size.width * 0.2,
                                     heights: size.height * 0.1,
                                     itemName: 'Scan',
-                                    action: (){
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const QrPage()));
+                                    action: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const QrPage()));
                                     },
                                     picked: picked2,
                                     icon: Icons.qr_code_2_outlined)
@@ -237,7 +255,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                         ),
                       ),
                       Expanded(
-                          child: PageView(children: [
+                          child: PageView(controller: controlpage, children: [
                         StreamBuilder(
                             stream: FirebaseFirestore.instance
                                 .collection('instansi')
@@ -283,6 +301,43 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                 );
                               }
                             }),
+                        StreamBuilder(
+                            stream: FirebaseFirestore.instance
+                                .collection('instansi')
+                                .doc(nameInstansi.instansiName)
+                                .collection('users')
+                                .doc(user.email!)
+                                .collection('atpers')
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return ListView.builder(
+                                    itemCount: snapshot.data!.docs.length,
+                                    itemBuilder: (_, index) {
+                                      final data = snapshot.data!.docs[index];
+                                      return data['noattendace'] == ''
+                                          ? AttedanceCard(
+                                              asset: Image.asset(
+                                                'images/att.png',
+                                                fit: BoxFit.fitHeight,
+                                              ),
+                                              checkout: data['checkout'],
+                                              checkin: data['checkIn'],
+                                              time: data['timestamp'])
+                                          : AttedanceCard(
+                                              asset: Lottie.asset(
+                                                  'lottie/nosick.json',
+                                                  fit: BoxFit.cover),
+                                              checkout: data['noattendace'],
+                                              checkin: data['checkIn'],
+                                              time: data['timestamp']);
+                                    });
+                              } else {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                            }),
                       ])),
                       Container(
                         height: size.height * 0.1,
@@ -296,7 +351,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                 width: size.width * 0.4,
                                 height: size.height * 0.065,
                                 action: () async {
-                                  await method.addCheckIn(
+                                  await _present!.addcheckin(
                                       user.email!,
                                       format.formatTime(DateTime.now()),
                                       format.formatDate(DateTime.now()));
@@ -308,10 +363,10 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                 width: size.width * 0.4,
                                 height: size.height * 0.065,
                                 action: () async {
-                                  await method.updatecheckout(
+                                  await _present!.addcheckout(
                                       user.email!,
-                                      format.formatDate(DateTime.now()),
-                                      format.formatTime(DateTime.now()));
+                                      format.formatTime(DateTime.now()),
+                                      format.formatDate(DateTime.now()));
                                 },
                                 colo: ColorUse.colorBf),
                           ],

@@ -4,24 +4,37 @@ import 'package:attedancebeta/popup/show.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
-
 import '../model_db/hive_model.dart';
+import '../presenter/presenter_one.dart';
 
-class UserProfile extends StatefulWidget {
+// presenter page => presenterone
+
+class UserProfile extends ConsumerStatefulWidget {
   final VoidCallback action;
   const UserProfile({super.key, required this.action});
 
   @override
-  State<UserProfile> createState() => _UserProfileState();
+  ConsumerState<UserProfile> createState() => _UserProfileState();
 }
 
-class _UserProfileState extends State<UserProfile> {
+class _UserProfileState extends ConsumerState<UserProfile> {
   TextEditingController updatebio = TextEditingController();
+  TextEditingController updateUsername = TextEditingController();
+  Presenterone?_present;
   User user = FirebaseAuth.instance.currentUser!;
   var box = Hive.box<Dbmodel>('boxname');
   ShowPop showit = ShowPop();
   String imgUrle = '';
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _present = ref.read(present);
+    });
+  }
   @override
   void dispose() {
     super.dispose();
@@ -87,7 +100,17 @@ class _UserProfileState extends State<UserProfile> {
                                     fontWeight: FontWeight.w500),
                               ),
                               IconButton(
-                                  onPressed: () async {},
+                                  onPressed: () async {
+                                    showit.showUp(context, () async {
+                                      // await method.updateUsername(user.email!, updateUsername.text).then((value) {
+                                      //   Navigator.pop(context);
+                                      // });
+                                      await _present!.updateUname(user.email!, updateUsername.text).then((value) {
+                                        Navigator.pop(context);
+                                      });
+                                    },
+                                     'username', updateUsername, 'name');
+                                  },
                                   icon: const Icon(Icons.mode_edit_sharp))
                             ],
                           ),
