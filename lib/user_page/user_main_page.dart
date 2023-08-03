@@ -16,9 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
-import '../all_method/method_firebase.dart';
+// import '../all_method/method_firebase.dart';
 import '../format_parse/format.dart';
 import '../model_db/hive_model.dart';
+import '../presenter/presenter_three.dart';
 import '../presenter/presenter_two.dart';
 
 // menggunakan Presentertwo
@@ -31,6 +32,7 @@ class UserMainPage extends ConsumerStatefulWidget {
 
 class _UserMainPageState extends ConsumerState<UserMainPage> {
   Presentertwo? _present;
+  Presenterthree? _log;
   PageController controlpage = PageController();
   String names = '';
   var box = Hive.box<Dbmodel>('boxname');
@@ -60,6 +62,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
     setState(() {
       initday = format.formatDate(DateTime.now());
       _present = ref.read(present2);
+      _log = ref.read(presentre);
     });
     super.initState();
   }
@@ -72,7 +75,6 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    MethodFirebase method = MethodFirebase();
     final size = MediaQuery.sizeOf(context);
     Dbmodel nameInstansi = box.getAt(0)!;
     return Scaffold(
@@ -424,7 +426,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
             ),
             InkWell(
                 onTap: () async {
-                  await method.signout(context, ref, box);
+                  await _log!.logout(context, ref, box);
                   ref.read(stateauth.notifier).update((state) => 1);
                 },
                 child: const DrawerMenu(
