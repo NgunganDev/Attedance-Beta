@@ -15,23 +15,12 @@ class FinalRouted extends StatefulWidget {
 
 class _FinalRoutedState extends State<FinalRouted> {
   User user = FirebaseAuth.instance.currentUser!;
-//   var box = Hive.box<Dbmodel>('boxname');
-// String fetchin () {
-//   modi = box.getAt(0);
-//   return modi!.instansiName;
-// }
+
  var box = Hive.box<Dbmodel>('boxname');
-
-// Future<void> fetchin() async {
-//     var box = Hive.box<Dbmodel>('boxname');
-//     setState(() {
-//       modi =  box.getAt(0);
-//     });
-//     print(box.length);
-// }
-
   @override
   void initState() {
+    print(box.length);
+    print(user.email!);
     super.initState();
     // fetchin();
   }

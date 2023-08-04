@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 class Format {
+  // Format({thiss.form});
   String formatDate(DateTime date){
     String dateq = DateFormat.yMMMEd().format(date);
     return dateq;

@@ -8,12 +8,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
+import '../format_parse/format.dart';
 import '../model_db/hive_model.dart';
 
 // perlu maintenance
-class MethodFirebase {
+class MethodFirebase extends Format {
+  MethodFirebase() : super();
+  String _inputTime = '';
   CollectionReference instansiRef =
       FirebaseFirestore.instance.collection('instansi');
+
+  String get user {
+    if (FirebaseAuth.instance.currentUser != null) {
+      return FirebaseAuth.instance.currentUser!.email!;
+    } else {
+      return 'no user';
+    }
+  }
+
+  set inputTime(String day) {
+    _inputTime = day;
+    print(_inputTime);
+  }
 
   Future<String> fetchIns() async {
     var box = Hive.box<Dbmodel>('boxname');
@@ -27,8 +43,17 @@ class MethodFirebase {
   }
 
   Future<void> putins(String name) async {
-     var box = Hive.box<Dbmodel>('boxname');
+    var box = Hive.box<Dbmodel>('boxname');
     await box.put(0, Dbmodel(instansiName: name));
+  }
+
+  Stream<DocumentSnapshot> userData() async* {
+    final data = instansiRef
+        .doc(await fetchIns())
+        .collection('users')
+        .doc(user)
+        .snapshots();
+    yield* data;
   }
 
   ImagePicker imagepicker = ImagePicker();
@@ -51,14 +76,14 @@ class MethodFirebase {
     });
   }
 
-  Future<void> signInEmail(
-      String email, String password, BuildContext context, String nameInstansi) async {
+  Future<void> signInEmail(String email, String password, BuildContext context,
+      String nameInstansi) async {
     await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) async {
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => const FinalRouted()));
-          await putins(nameInstansi);
+      await putins(nameInstansi);
     });
   }
 

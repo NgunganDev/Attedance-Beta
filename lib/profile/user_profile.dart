@@ -1,6 +1,7 @@
 import 'package:attedancebeta/all_method/method_firebase.dart';
 import 'package:attedancebeta/color/color_const.dart';
 import 'package:attedancebeta/popup/show.dart';
+// import 'package:attedancebeta/state/state_manage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +44,7 @@ class _UserProfileState extends ConsumerState<UserProfile> {
 
   @override
   Widget build(BuildContext context) {
+    // final watchUser = ref.watch(streamUser);
     MethodFirebase method = MethodFirebase();
     Dbmodel instansi = box.getAt(0)!;
     final size = MediaQuery.sizeOf(context);
@@ -169,6 +171,19 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                     );
                   }
                 }),
+                // watchUser.when(data: (data){
+                //   return Center(
+                //     child: Text(data['username']),
+                //   );
+                // }, error: (e,r){
+                //   return const Center(
+                //     child: Text('error'),
+                //   );
+                // }, loading: (){
+                //   return const Center(
+                //     child: CircularProgressIndicator(),
+                //   );
+                // })
           ],
         ),
       ),
