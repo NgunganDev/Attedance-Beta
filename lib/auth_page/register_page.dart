@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../model_db/hive_model.dart';
-import '../presenter/presenter_three.dart';
+import '../presenter/auth_presenter.dart';
 import '../widget_control/form_control.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
@@ -19,13 +19,13 @@ class RegisterPage extends ConsumerStatefulWidget {
 
 class _RegisterPageState extends ConsumerState<RegisterPage> {
   Presenterthree? _present;
-  final _controluser = TextEditingController();
-  final _controlemails = TextEditingController();
-  final _controlpasswords = TextEditingController();
+  final _controlUser = TextEditingController();
+  final _controlEmail = TextEditingController();
+  final _controlPassword = TextEditingController();
   final items = ['Admin', 'User'];
-  final items2 = ['Instansi 1', 'Instansi 2', 'Instansi 3'];
+  final itemsInstansi = ['Instansi 1', 'Instansi 2', 'Instansi 3'];
   String? type;
-  String? selectedValue2;
+  String? selectInstansi;
   // final _method = MethodFirebase();
   var box = Hive.box<Dbmodel>('boxname');
 
@@ -38,9 +38,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   void dispose() {
     super.dispose();
-    _controlemails.dispose();
-    _controlpasswords.dispose();
-    _controluser.dispose();
+    _controlEmail.dispose();
+    _controlPassword.dispose();
+    _controlUser.dispose();
   }
 
   @override
@@ -162,7 +162,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                     color: Theme.of(context).hintColor,
                                   ),
                                 ),
-                                items: items2
+                                items: itemsInstansi
                                     .map((String item) =>
                                         DropdownMenuItem<String>(
                                           value: item,
@@ -174,10 +174,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                           ),
                                         ))
                                     .toList(),
-                                value: selectedValue2,
+                                value: selectInstansi,
                                 onChanged: (String? value) {
                                   setState(() {
-                                    selectedValue2 = value;
+                                    selectInstansi = value;
                                   });
                                 },
                                 buttonStyleData: ButtonStyleData(
@@ -216,7 +216,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               widths: size.width * 0.85,
                               heights: size.height * 0.098,
                               hint: 'username',
-                              controlit: _controluser,
+                              controlit: _controlUser,
                               icon: Icons.email_sharp),
                         ],
                       ),
@@ -240,7 +240,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               widths: size.width * 0.85,
                               heights: size.height * 0.098,
                               hint: 'email...',
-                              controlit: _controlemails,
+                              controlit: _controlEmail,
                               icon: Icons.email_sharp),
                         ],
                       ),
@@ -264,7 +264,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               widths: size.width * 0.85,
                               heights: size.height * 0.098,
                               hint: 'password...',
-                              controlit: _controlpasswords,
+                              controlit: _controlPassword,
                               icon: Icons.email_sharp),
                         ],
                       ),
@@ -291,11 +291,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           heights: size.height * 0.08,
                           text: 'SignUp',
                           action: () async {
-                            await _present!.signup(
-                                _controlemails.text,
-                                _controlpasswords.text,
-                                _controluser.text,
-                                selectedValue2!,
+                            await _present!.signUp(
+                                _controlEmail.text,
+                                _controlPassword.text,
+                                _controlUser.text,
+                                selectInstansi!,
                                 type!, context);
                                 print(box.length);
                           },

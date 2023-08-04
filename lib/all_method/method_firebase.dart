@@ -15,7 +15,7 @@ class MethodFirebase {
   CollectionReference instansiRef =
       FirebaseFirestore.instance.collection('instansi');
 
-  Future<String> fetchins() async {
+  Future<String> fetchIns() async {
     var box = Hive.box<Dbmodel>('boxname');
     Dbmodel ins = box.getAt(0) ?? Dbmodel(instansiName: 'Instansi 1');
     return ins.instansiName;
@@ -26,13 +26,13 @@ class MethodFirebase {
     await box.add(Dbmodel(instansiName: name));
   }
 
-  Future<void> putins() async {
-
+  Future<void> putins(String name) async {
+     var box = Hive.box<Dbmodel>('boxname');
+    await box.put(0, Dbmodel(instansiName: name));
   }
 
-
   ImagePicker imagepicker = ImagePicker();
-  Future<void> signupemail(String email, String password, String username,
+  Future<void> signUpEmail(String email, String password, String username,
       String instansi, String type, BuildContext context) async {
     await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password)
@@ -44,23 +44,25 @@ class MethodFirebase {
         "bio": "",
         "photoUrl": "",
       }).then((value) async {
-       Navigator.push(context, MaterialPageRoute(builder: (context) => const FinalRouted() ));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const FinalRouted()));
         await addins(instansi);
       });
     });
   }
 
-  Future<void> signinemail(
-      String email, String password, BuildContext context) async {
+  Future<void> signInEmail(
+      String email, String password, BuildContext context, String nameInstansi) async {
     await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
-        .then((value) {
+        .then((value) async {
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => const FinalRouted()));
+          await putins(nameInstansi);
     });
   }
 
-  Future<void> signout(BuildContext context, WidgetRef ref, Box box) async {
+  Future<void> signOut(BuildContext context, WidgetRef ref, Box box) async {
     await FirebaseAuth.instance.signOut().then((value) {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const Routed()));
@@ -71,13 +73,15 @@ class MethodFirebase {
 
   Future<void> updatePicture(String photoUrl, String ins, String user) async {
     instansiRef
-        .doc(await fetchins())
+        .doc(await fetchIns())
         .collection('users')
         .doc(user)
         .update({"photoUrl": photoUrl}).then((value) {
       print('success add a picture');
     });
   }
+
+  Future<void> deleteAttend() async {}
 
   Future<String> pickImg(String ins, String user) async {
     String imgUrl = '';
@@ -99,10 +103,10 @@ class MethodFirebase {
   }
 
   Future<void> addCheckIn(String user, String timestamp, String day) async {
-    await instansiRef.doc(await fetchins()).collection('attedance').add(
+    await instansiRef.doc(await fetchIns()).collection('attedance').add(
         {"checkIn": timestamp, "checkout": "", "user": user, "timestamp": day});
     await instansiRef
-        .doc(await fetchins())
+        .doc(await fetchIns())
         .collection('users')
         .doc(user)
         .collection('atpers')
@@ -116,9 +120,9 @@ class MethodFirebase {
     });
   }
 
-  Future<void> updatecheckout(String user, String day, String timeout) async {
+  Future<void> updateCheckOut(String user, String day, String timeout) async {
     CollectionReference refdes = instansiRef
-        .doc(await fetchins())
+        .doc(await fetchIns())
         .collection('users')
         .doc(user)
         .collection('atpers');
@@ -134,7 +138,7 @@ class MethodFirebase {
     }
 
     CollectionReference refAll =
-        instansiRef.doc(await fetchins()).collection('attedance');
+        instansiRef.doc(await fetchIns()).collection('attedance');
     QuerySnapshot resAll =
         await refAll.where('timestamp', isEqualTo: day).get();
     for (var docTo in resAll.docs) {
@@ -142,9 +146,9 @@ class MethodFirebase {
     }
   }
 
-  Future<void> addNon(String timestamp, String user, String day, String non,
-      String info) async {
-    await instansiRef.doc(await fetchins()).collection('attedance').add({
+  Future<void> nonAttedance(String timestamp, String user, String day,
+      String non, String info) async {
+    await instansiRef.doc(await fetchIns()).collection('attedance').add({
       "checkIn": timestamp,
       "noattendace": non,
       "info": info,
@@ -153,7 +157,7 @@ class MethodFirebase {
       "timestamp": day
     });
     await instansiRef
-        .doc(await fetchins())
+        .doc(await fetchIns())
         .collection('users')
         .doc(user)
         .collection('atpers')
@@ -169,7 +173,7 @@ class MethodFirebase {
 
   Future<void> updateBioname(String user, String contentbio) async {
     await instansiRef
-        .doc(await fetchins())
+        .doc(await fetchIns())
         .collection('users')
         .doc(user)
         .update({
@@ -181,13 +185,13 @@ class MethodFirebase {
 
   Future<void> updateUsername(String user, String username) async {
     await instansiRef
-        .doc(await fetchins())
+        .doc(await fetchIns())
         .collection('users')
         .doc(user)
         .update({
-          "username": username,
-        }).then((value) {
-          print('success update username');
-        });
+      "username": username,
+    }).then((value) {
+      print('success update username');
+    });
   }
 }

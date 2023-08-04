@@ -149,7 +149,7 @@ class _UsernonState extends State<Usernon> {
                 text: 'SEND',
                 action: () async {
                   await method
-                      .addNon(
+                      .nonAttedance(
                           format.formatTime(DateTime.now()),
                           widget.user,
                           format.formatDate(DateTime.now()),

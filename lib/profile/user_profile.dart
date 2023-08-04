@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../model_db/hive_model.dart';
-import '../presenter/presenter_one.dart';
+import '../presenter/profile_presenter.dart';
 
 // presenter page => presenterone
 
@@ -75,12 +75,11 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                         children: [
                           InkWell(
                             onTap: () async {
-                              setState(() async {
-                                imgUrle = await method.pickImg(
-                                    instansi.instansiName, user.email!);
-                                await method.updatePicture(imgUrle,
-                                    instansi.instansiName, user.email!);
-                              });
+                              await _present!.updatePic(instansi.instansiName, user.email!);
+                              // setState(() async {
+                              //   imgUrle = await method.pickImg(
+                              //       instansi.instansiName, user.email!);
+                              // });
                             },
                             child: CircleAvatar(
                               radius: size.height * 0.05,

@@ -16,11 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
-// import '../all_method/method_firebase.dart';
 import '../format_parse/format.dart';
 import '../model_db/hive_model.dart';
-import '../presenter/presenter_three.dart';
-import '../presenter/presenter_two.dart';
+import '../presenter/auth_presenter.dart';
+import '../presenter/user_presenter.dart';
 
 // menggunakan Presentertwo
 class UserMainPage extends ConsumerStatefulWidget {
@@ -43,6 +42,15 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
   ShowPop show = ShowPop();
   User user = FirebaseAuth.instance.currentUser!;
   String? initday;
+  int curPage = 0;
+
+  bool checkPage(int yourPage){
+    if(yourPage == curPage){
+      return true;
+    }else{
+      return false;
+    }
+  }
   Future<String> caleresString(BuildContext context) async {
     String pickedDate = '';
     await showDatePicker(
@@ -196,14 +204,15 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                   icon: Icons.calendar_today_sharp,
                                   action: () async {
                                     // print(initday);
+                                    controlpage.animateToPage(0, duration: const Duration(milliseconds: 700), curve: Curves.easeIn);
                                     await caleresString(context).then((value) {
                                       initday = value;
                                     });
-                                    setState(() {
-                                      picked1 = !picked1;
-                                    });
+                                    // setState(() {
+                                    //   picked1 = !picked1;
+                                    // });
                                   },
-                                  picked: picked1,
+                                  picked: checkPage(0),
                                 ),
                                 UserChocard(
                                     widths: size.width * 0.2,
@@ -219,7 +228,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                           curve: Curves.easeIn);
                                       // checksame();
                                     },
-                                    picked: picked2),
+                                    picked: checkPage(1)),
                                 UserChocard(
                                     widths: size.width * 0.2,
                                     heights: size.height * 0.1,
@@ -257,7 +266,13 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                         ),
                       ),
                       Expanded(
-                          child: PageView(controller: controlpage, children: [
+                          child: PageView(
+                            onPageChanged: (val){
+                              setState(() {
+                                curPage = val;
+                              });
+                            },
+                            controller: controlpage, children: [
                         StreamBuilder(
                             stream: FirebaseFirestore.instance
                                 .collection('instansi')
@@ -426,7 +441,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
             ),
             InkWell(
                 onTap: () async {
-                  await _log!.logout(context, ref, box);
+                  await _log!.logOut(context, ref, box);
                   ref.read(stateauth.notifier).update((state) => 1);
                 },
                 child: const DrawerMenu(

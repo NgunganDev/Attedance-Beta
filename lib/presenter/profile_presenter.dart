@@ -16,4 +16,13 @@ class Presenterone {
     await method.updateBioname(user, newBio);
   }
 
+  Future<void> updatePic(String ins, String user) async {
+    await method.pickImg(ins, user);
+  }
+
+  Future<String> insName() async {
+    String name =await method.fetchIns();
+    return name;
+  }
+
  }

@@ -13,6 +13,6 @@ class Presentertwo {
   }
 
   Future<void> addcheckout(String user, String day, String timeout) async {
-    await method.updatecheckout(user, day, timeout);
+    await method.updateCheckOut(user, day, timeout);
   }
 }

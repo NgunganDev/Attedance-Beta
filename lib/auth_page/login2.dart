@@ -2,10 +2,8 @@ import 'package:attedancebeta/state/state_manage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import '../color/color_const.dart';
-import '../model_db/hive_model.dart';
-import '../presenter/presenter_three.dart';
+import '../presenter/auth_presenter.dart';
 import '../routed/final_routed.dart';
 import '../widget_control/button_control.dart';
 import '../widget_control/form_control.dart';
@@ -18,8 +16,10 @@ class LoginDendam extends ConsumerStatefulWidget {
 }
 
 class _LoginDendamState extends ConsumerState<LoginDendam> {
+  final _controlEmail = TextEditingController();
+  final _controlInstansi = TextEditingController();
+  final _controlPassword = TextEditingController();
   Presenterthree? _present;
-  var box = Hive.box<Dbmodel>('boxname');
   User? user;
   @override
   void initState() {
@@ -36,9 +36,6 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
 
   @override
   Widget build(BuildContext context) {
-    final controlem = TextEditingController();
-    final controlins = TextEditingController();
-    final controlpa = TextEditingController();
     // final watchit = ref.watch(stateauth);
     final size = MediaQuery.sizeOf(context);
     return SingleChildScrollView(
@@ -123,7 +120,7 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
                               widths: size.width * 0.85,
                               heights: size.height * 0.098,
                               hint: 'email...',
-                              controlit: controlem,
+                              controlit: _controlEmail,
                               icon: Icons.email_sharp),
                         ],
                       ),
@@ -147,7 +144,7 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
                               widths: size.width * 0.85,
                               heights: size.height * 0.098,
                               hint: 'password...',
-                              controlit: controlpa,
+                              controlit: _controlPassword,
                               icon: Icons.password_sharp),
                         ],
                       ),
@@ -168,7 +165,7 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
                               widths: size.width * 0.85,
                               heights: size.height * 0.098,
                               hint: 'instansi',
-                              controlit: controlins,
+                              controlit: _controlInstansi,
                               icon: Icons.password_sharp),
                         ],
                       ),
@@ -200,13 +197,14 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
                           heights: size.height * 0.075,
                           text: 'SignIn',
                           action: () async {
-                            await _present!.signin(
-                                controlem.text, controlpa.text, context);
-                            await box.put(
-                                0, Dbmodel(instansiName: controlins.text));
-                            controlem.clear();
-                            controlpa.clear();
-                            controlins.clear();
+                            await _present!.signIn(
+                                _controlEmail.text,
+                                _controlPassword.text,
+                                context,
+                                _controlInstansi.text);
+                            _controlEmail.clear();
+                            _controlPassword.clear();
+                            _controlInstansi.clear();
                           },
                           size: size)
                     ],
