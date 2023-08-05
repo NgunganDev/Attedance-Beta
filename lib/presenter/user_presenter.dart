@@ -16,8 +16,9 @@ class Presentertwo {
     print('ch');
     await method.updateCheckOut(user, day, timeout);
   }
-  void inputTime (String value){
-    method.inputTime = value;
-    print(value);
+
+  void userNow(String name){
+    print(name);
+    method.inputUser = name;
   }
 }

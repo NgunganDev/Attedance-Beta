@@ -1,8 +1,7 @@
 import 'package:attedancebeta/all_method/method_firebase.dart';
 import 'package:attedancebeta/color/color_const.dart';
 import 'package:attedancebeta/popup/show.dart';
-// import 'package:attedancebeta/state/state_manage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:attedancebeta/state/state_manage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,7 +43,8 @@ class _UserProfileState extends ConsumerState<UserProfile> {
 
   @override
   Widget build(BuildContext context) {
-    // final watchUser = ref.watch(streamUser);
+    final watchUser = ref.watch(streamUser);
+    final watchModel = ref.watch(streamModel);
     MethodFirebase method = MethodFirebase();
     Dbmodel instansi = box.getAt(0)!;
     final size = MediaQuery.sizeOf(context);
@@ -61,31 +61,18 @@ class _UserProfileState extends ConsumerState<UserProfile> {
             Container(
               width: size.width * 0.8,
               height: size.height * 0.2,
-              child: StreamBuilder(
-                  stream: FirebaseFirestore.instance
-                      .collection('instansi')
-                      .doc(instansi.instansiName)
-                      .collection('users')
-                      .doc(user.email!)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      final data = snapshot.data!.data();
-                      return Column(
+              child: watchUser.when(data: (datas){
+                return Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           InkWell(
                             onTap: () async {
                               await _present!.updatePic(instansi.instansiName, user.email!);
-                              // setState(() async {
-                              //   imgUrle = await method.pickImg(
-                              //       instansi.instansiName, user.email!);
-                              // });
                             },
                             child: CircleAvatar(
                               radius: size.height * 0.05,
-                              backgroundImage: NetworkImage(data!['photoUrl']),
+                              backgroundImage: NetworkImage(datas['photoUrl']),
                             ),
                           ),
                           Row(
@@ -95,7 +82,7 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                                 height: size.width * 0.08,
                               ),
                               Text(
-                                data['username'],
+                                datas['username'],
                                 style: TextStyle(
                                     fontSize: size.height * 0.035,
                                     fontWeight: FontWeight.w500),
@@ -117,22 +104,18 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                           ),
                         ],
                       );
-                    } else {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                  }),
+              }, error: (e,r){
+                return const Center(
+                  child: Text('error page'),
+                );
+              }, loading: (){
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }),
             ),
-            StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('instansi')
-                    .doc(instansi.instansiName)
-                    .collection('users')
-                    .doc(user.email!)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    final data = snapshot.data!.data();
-                    return Container(
+            watchUser.when(data: (data){
+              return  Container(
                       width: size.width * 0.8,
                       height: size.height * 0.15,
                       child: Column(
@@ -149,7 +132,7 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(data!['bio']),
+                                Text(data['bio']),
                                 IconButton(
                                     onPressed: () {
                                       showit.showUp(context, () async {
@@ -165,25 +148,26 @@ class _UserProfileState extends ConsumerState<UserProfile> {
                         ],
                       ),
                     );
-                  } else {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                }),
-                // watchUser.when(data: (data){
-                //   return Center(
-                //     child: Text(data['username']),
-                //   );
-                // }, error: (e,r){
-                //   return const Center(
-                //     child: Text('error'),
-                //   );
-                // }, loading: (){
-                //   return const Center(
-                //     child: CircularProgressIndicator(),
-                //   );
-                // })
+            }, error: (e,r){
+              return const Center();
+            }, loading: (){
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }),
+            watchModel.when(data: (datas){
+              return Center(
+                child: Text(datas.userName),
+              );
+            }, error: (e,r){
+              return const Center(
+                child: Text('no data'),
+              );
+            }, loading: (){
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            })
           ],
         ),
       ),

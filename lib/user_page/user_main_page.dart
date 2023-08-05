@@ -37,7 +37,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
   var box = Hive.box<Dbmodel>('boxname');
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   // GlobalKey<PageVi> _pageViewKey = GlobalKey();
-   Key pageKey = UniqueKey();
+  Key pageKey = UniqueKey();
 
   bool picked1 = false;
   bool picked2 = false;
@@ -47,10 +47,9 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
   String? initday;
   int curPage = 0;
 
-
   Future<String> caleresString(BuildContext context) async {
     String pickedDate = '';
-   await showDatePicker(
+    await showDatePicker(
             context: context,
             initialDate: DateTime.now(),
             firstDate: DateTime(2000),
@@ -59,8 +58,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
       pickedDate = Format().formatDate(value!);
       print(pickedDate);
       setState(() {
-        
-       pageKey = UniqueKey();
+        pageKey = UniqueKey();
       });
     });
     return pickedDate;
@@ -80,20 +78,31 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
       initday = format.formatDate(DateTime.now());
       _present = ref.read(present2);
       _log = ref.read(presentre);
+      _present!.userNow(user.email!);
     });
     print(box.length);
     super.initState();
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // final uses = ref.watch(stateUser);
+    // _present!.userNow(uses);
+    // print(uses);
+  }
+
+  @override
   void dispose() {
     super.dispose();
+    // uses
     controlpage.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final watchUserToday = ref.watch(streamUser);
+    final allAttendace = ref.watch(streamAttedance);
     final size = MediaQuery.sizeOf(context);
     Dbmodel nameInstansi = box.getAt(0)!;
     return Scaffold(
@@ -192,7 +201,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Categories',
+                                    user.email!,
                                     style: TextStyle(
                                         fontSize: size.height * 0.02,
                                         fontWeight: FontWeight.w600),
@@ -282,7 +291,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                       ),
                       Expanded(
                           child: PageView(
-                            key: pageKey,
+                              key: pageKey,
                               onPageChanged: (val) {
                                 setState(() {
                                   curPage = val;
@@ -291,6 +300,8 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                               controller: controlpage,
                               children: [
                             watchUserToday.when(data: (datas) {
+                              print(datas.id);
+                              // print(user.email);
                               final datasFinal = datas.reference
                                   .collection('atpers')
                                   .where('timestamp', isEqualTo: initday);
@@ -302,10 +313,10 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                   children: [
                                     IconButton(
                                         onPressed: () async {
-                                            await caleresString(context).then((value){
-                                              initday = value;
-                                            } );
-                                          
+                                          await caleresString(context)
+                                              .then((value) {
+                                            initday = value;
+                                          });
                                         },
                                         icon: const Icon(Icons.calendar_month)),
                                     SizedBox(
@@ -315,6 +326,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                           stream: datasFinal.snapshots(),
                                           builder: (ctx, snapshot) {
                                             if (snapshot.hasData) {
+                                              print(datas.id);
                                               final theData =
                                                   snapshot.data!.docs;
                                               return ListView.builder(
@@ -367,44 +379,37 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                 child: CircularProgressIndicator(),
                               );
                             }),
-                            StreamBuilder(
-                                stream: FirebaseFirestore.instance
-                                    .collection('instansi')
-                                    .doc(nameInstansi.instansiName)
-                                    .collection('users')
-                                    .doc(user.email!)
-                                    .collection('atpers')
-                                    .snapshots(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    return ListView.builder(
-                                        itemCount: snapshot.data!.docs.length,
-                                        itemBuilder: (_, index) {
-                                          final data =
-                                              snapshot.data!.docs[index];
-                                          return data['noattendace'] == ''
-                                              ? AttedanceCard(
-                                                  asset: Image.asset(
-                                                    'images/att.png',
-                                                    fit: BoxFit.fitHeight,
-                                                  ),
-                                                  checkout: data['checkout'],
-                                                  checkin: data['checkIn'],
-                                                  time: data['timestamp'])
-                                              : AttedanceCard(
-                                                  asset: Lottie.asset(
-                                                      'lottie/nosick.json',
-                                                      fit: BoxFit.cover),
-                                                  checkout: data['noattendace'],
-                                                  checkin: data['checkIn'],
-                                                  time: data['timestamp']);
-                                        });
-                                  } else {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-                                }),
+                            allAttendace.when(data: (datas) {
+                              return ListView.builder(
+                                  itemCount: datas.docs.length,
+                                  itemBuilder: (_, index) {
+                                    final data = datas.docs[index];
+                                    return data['noattendace'] == ''
+                                        ? AttedanceCard(
+                                            asset: Image.asset(
+                                              'images/att.png',
+                                              fit: BoxFit.fitHeight,
+                                            ),
+                                            checkout: data['checkout'],
+                                            checkin: data['checkIn'],
+                                            time: data['timestamp'])
+                                        : AttedanceCard(
+                                            asset: Lottie.asset(
+                                                'lottie/nosick.json',
+                                                fit: BoxFit.cover),
+                                            checkout: data['noattendace'],
+                                            checkin: data['checkIn'],
+                                            time: data['timestamp']);
+                                  });
+                            }, error: (e, r) {
+                              return const Center(
+                                child: Text('no data'),
+                              );
+                            }, loading: () {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            })
                           ])),
                       Container(
                         height: size.height * 0.1,

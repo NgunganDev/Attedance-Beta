@@ -9,26 +9,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import '../format_parse/format.dart';
+import '../model_data/model_retrieve.dart';
 import '../model_db/hive_model.dart';
 
 // perlu maintenance
 class MethodFirebase extends Format {
-  MethodFirebase() : super();
-  String _inputTime = '';
+  // MethodFirebase() : super();
+  String _users = '';
   CollectionReference instansiRef =
       FirebaseFirestore.instance.collection('instansi');
 
-  String get user {
-    if (FirebaseAuth.instance.currentUser != null) {
-      return FirebaseAuth.instance.currentUser!.email!;
-    } else {
-      return 'no user';
-    }
+  String get userr {
+    return _users;
   }
 
-  set inputTime(String day) {
-    _inputTime = day;
-    print(_inputTime);
+  set inputUser(String user) {
+    _users = user;
   }
 
   Future<String> fetchIns() async {
@@ -48,10 +44,31 @@ class MethodFirebase extends Format {
   }
 
   Stream<DocumentSnapshot> userData() async* {
+    // print(user);
     final data = instansiRef
         .doc(await fetchIns())
         .collection('users')
-        .doc(user)
+        .doc(userr)
+        .snapshots();
+    yield* data;
+  }
+
+  Stream<ModelFire> dataModel() async* {
+    final data = instansiRef
+        .doc(await fetchIns())
+        .collection('users')
+        .doc(userr)
+        .snapshots()
+        .map((event) => ModelFire.fromSnapshot(event));
+    yield* data;
+  }
+
+  Stream<QuerySnapshot> userAttedance() async* {
+    final data = instansiRef
+        .doc(await fetchIns())
+        .collection('users')
+        .doc(userr)
+        .collection('atpers')
         .snapshots();
     yield* data;
   }

@@ -27,7 +27,10 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
     user = FirebaseAuth.instance.currentUser;
     _present = ref.read(presentre);
     if (user != null) {
+      // ref.read(stateUser.notifier).update((state) => user!.email);
       Future.delayed(const Duration(seconds: 1), () {
+        // ref.read(stateUser.notifier).state = user!.email.toString();
+        //  ref.read(stateUser.notifier).update((state) { return user!.email.toString();});
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => const FinalRouted()));
       });

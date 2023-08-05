@@ -4,26 +4,20 @@ import 'package:attedancebeta/user_page/user_main_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-class FinalRouted extends StatefulWidget {
+class FinalRouted extends ConsumerStatefulWidget {
   const FinalRouted({super.key});
 
   @override
-  State<FinalRouted> createState() => _FinalRoutedState();
+  ConsumerState<FinalRouted> createState() => _FinalRoutedState();
 }
 
-class _FinalRoutedState extends State<FinalRouted> {
+class _FinalRoutedState extends ConsumerState<FinalRouted> {
   User user = FirebaseAuth.instance.currentUser!;
 
  var box = Hive.box<Dbmodel>('boxname');
-  @override
-  void initState() {
-    print(box.length);
-    print(user.email!);
-    super.initState();
-    // fetchin();
-  }
   @override
   Widget build(BuildContext context) {
     Dbmodel modi = box.getAt(0)!;
