@@ -28,3 +28,8 @@ final streamTodayAtt = StreamProvider.autoDispose((ref) {
   final present = ref.watch(stateinst);
   return present.todayAttedance(time);
 });
+
+final streamBarAtedance = StreamProvider.autoDispose((ref) {
+  final present = ref.watch(stateinst);
+  return present.adminBarChart();
+});

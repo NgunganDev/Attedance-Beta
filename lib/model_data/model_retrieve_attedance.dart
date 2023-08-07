@@ -10,6 +10,7 @@ class ModelAttedance {
   final String uuid;
   final bool accept;
   final String dataId;
+  final Timestamp realtime;
 
   ModelAttedance(
       {required this.checkIn,
@@ -20,7 +21,8 @@ class ModelAttedance {
       required this.user,
       required this.uuid,
       required this.accept,
-      required this.dataId
+      required this.dataId,
+      required this.realtime,
       });
 
   factory ModelAttedance.fromSnapshot(DocumentSnapshot snap) {
@@ -34,7 +36,8 @@ class ModelAttedance {
         timeStamp: data['timestamp'] ?? "nodata",
         uuid: data['uuid'],
         accept: data['accept'],
-        dataId: snap.id
+        dataId: snap.id,
+        realtime: data['realtime']
         );
 
   }

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:attedancebeta/routed/final_routed.dart';
-// import 'package:attedancebeta/routed/non_final_routed.dart';
 import 'package:attedancebeta/routed/routed.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -116,6 +115,24 @@ class MethodFirebase extends Format {
     yield* data;
   }
 
+  Stream<List<ModelAttedance>> adminBarChart() async* {
+    final timeNow = Timestamp.now();
+    final startWeek = timeNow.toDate().subtract(Duration(days: timeNow.toDate().weekday - 1));
+    print(startWeek);
+    final endWeek = timeNow.toDate().add(Duration(days: 7 - timeNow.toDate().weekday));
+    var data = instansiRef
+        .doc(await fetchIns())
+        .collection('attedance')
+        .where('realtime', isGreaterThanOrEqualTo: startWeek)
+        .where('realtime', isLessThan: endWeek)
+        .snapshots()
+        .map((event) {
+      return event.docs.map((e) => ModelAttedance.fromSnapshot(e)).toList();
+    });
+
+    yield* data;
+  }
+
   ImagePicker imagepicker = ImagePicker();
   Future<void> signUpEmail(String email, String password, String username,
       String instansi, String type, BuildContext context) async {
@@ -195,7 +212,8 @@ class MethodFirebase extends Format {
       "user": user,
       "timestamp": day,
       "uuid": uuid,
-      "accept": false
+      "accept": false,
+      "realtime": DateTime.now()
     });
     await instansiRef
         .doc(await fetchIns())
@@ -210,7 +228,8 @@ class MethodFirebase extends Format {
       "user": user,
       "timestamp": day,
       "uuid": uuid,
-      "accept": false
+      "accept": false,
+      "realtime": DateTime.now()
     });
   }
 
@@ -240,7 +259,8 @@ class MethodFirebase extends Format {
     }
   }
 
-  Future<void> acceptData(String idAtt, String idUser, bool condition, String uid) async {
+  Future<void> acceptData(
+      String idAtt, String idUser, bool condition, String uid) async {
     CollectionReference ref = instansiRef
         .doc(await fetchIns())
         .collection('users')
