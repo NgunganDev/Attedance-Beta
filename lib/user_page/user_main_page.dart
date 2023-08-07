@@ -16,10 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
-import '../format_parse/format.dart';
 import '../model_db/hive_model.dart';
 import '../presenter/auth_presenter.dart';
 import '../presenter/user_presenter.dart';
+// import '../routed/routed.dart';
 
 // menggunakan Presentertwo
 class UserMainPage extends ConsumerStatefulWidget {
@@ -41,7 +41,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
 
   bool picked1 = false;
   bool picked2 = false;
-  Format format = Format();
+  // Format format = Format();
   ShowPop show = ShowPop();
   User user = FirebaseAuth.instance.currentUser!;
   String? initday;
@@ -55,10 +55,10 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
             firstDate: DateTime(2000),
             lastDate: (DateTime.now()).add(const Duration(days: 7)))
         .then((value) {
-      pickedDate = Format().formatDate(value!);
-      print(pickedDate);
+      pickedDate = _present!.formatDate(value!);
       setState(() {
         pageKey = UniqueKey();
+        _present!.timeDay(pickedDate);
       });
     });
     return pickedDate;
@@ -75,10 +75,10 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
   @override
   void initState() {
     setState(() {
-      initday = format.formatDate(DateTime.now());
       _present = ref.read(present2);
       _log = ref.read(presentre);
       _present!.userNow(user.email!);
+      initday = _present!.formatDate(DateTime.now());
     });
     print(box.length);
     super.initState();
@@ -87,9 +87,6 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // final uses = ref.watch(stateUser);
-    // _present!.userNow(uses);
-    // print(uses);
   }
 
   @override
@@ -102,7 +99,8 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
   @override
   Widget build(BuildContext context) {
     final watchUserToday = ref.watch(streamUser);
-    final allAttendace = ref.watch(streamAttedance);
+    final modelAttedance = ref.watch(streamModelAtt);
+    final userModel = ref.watch(streamModel);
     final size = MediaQuery.sizeOf(context);
     Dbmodel nameInstansi = box.getAt(0)!;
     return Scaffold(
@@ -143,28 +141,22 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                           ],
                         ),
                       ),
-                      StreamBuilder(
-                          stream: FirebaseFirestore.instance
-                              .collection('instansi')
-                              .doc(nameInstansi.instansiName)
-                              .collection('users')
-                              .doc(user.email)
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              final data = snapshot.data!.data();
-                              return UserCard(
-                                heights: size.height * 0.2,
-                                widths: size.width * 0.8,
-                                name: data!['username'],
-                                image: data['photoUrl'],
-                              );
-                            } else {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                          }),
+                      userModel.when(data: (data) {
+                        return UserCard(
+                          heights: size.height * 0.2,
+                          widths: size.width * 0.8,
+                          name: data.userName,
+                          image: data.photoUrl,
+                        );
+                      }, error: (e, r) {
+                        return const Center(
+                          child: Text('err'),
+                        );
+                      }, loading: () {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      })
                     ],
                   )),
             ),
@@ -300,8 +292,6 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                               controller: controlpage,
                               children: [
                             watchUserToday.when(data: (datas) {
-                              print(datas.id);
-                              // print(user.email);
                               final datasFinal = datas.reference
                                   .collection('atpers')
                                   .where('timestamp', isEqualTo: initday);
@@ -316,12 +306,13 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                           await caleresString(context)
                                               .then((value) {
                                             initday = value;
+                                            _present!.timeDay(value);
                                           });
                                         },
                                         icon: const Icon(Icons.calendar_month)),
                                     SizedBox(
                                       width: size.width,
-                                      height: size.height * 0.25,
+                                      height: size.height * 0.28,
                                       child: StreamBuilder(
                                           stream: datasFinal.snapshots(),
                                           builder: (ctx, snapshot) {
@@ -330,12 +321,15 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                               final theData =
                                                   snapshot.data!.docs;
                                               return ListView.builder(
+                                                  physics:
+                                                      const NeverScrollableScrollPhysics(),
                                                   itemCount: theData.length,
                                                   itemBuilder: (_, index) {
                                                     return theData[index][
                                                                 'noattendace'] ==
                                                             ''
                                                         ? AttedanceCard(
+                                                          accept: theData[index]['accept'],
                                                             asset: Image.asset(
                                                               'images/att.png',
                                                               fit: BoxFit
@@ -349,6 +343,7 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                                             time: theData[index]
                                                                 ['timestamp'])
                                                         : AttedanceCard(
+                                                              accept: theData[index]['accept'],
                                                             asset: Lottie.asset(
                                                                 'lottie/nosick.json',
                                                                 fit: BoxFit
@@ -379,37 +374,39 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                 child: CircularProgressIndicator(),
                               );
                             }),
-                            allAttendace.when(data: (datas) {
+                            modelAttedance.when(data: (datas) {
                               return ListView.builder(
-                                  itemCount: datas.docs.length,
+                                  itemCount: datas.length,
                                   itemBuilder: (_, index) {
-                                    final data = datas.docs[index];
-                                    return data['noattendace'] == ''
+                                    final data = datas[index];
+                                    return data.noAttedance == ''
                                         ? AttedanceCard(
+                                              accept: datas[index].accept,
                                             asset: Image.asset(
                                               'images/att.png',
                                               fit: BoxFit.fitHeight,
                                             ),
-                                            checkout: data['checkout'],
-                                            checkin: data['checkIn'],
-                                            time: data['timestamp'])
+                                            checkout: data.checkOut,
+                                            checkin: data.checkIn,
+                                            time: data.timeStamp)
                                         : AttedanceCard(
+                                          accept: datas[index].accept,
                                             asset: Lottie.asset(
                                                 'lottie/nosick.json',
                                                 fit: BoxFit.cover),
-                                            checkout: data['noattendace'],
-                                            checkin: data['checkIn'],
-                                            time: data['timestamp']);
+                                            checkout: data.noAttedance,
+                                            checkin: data.checkIn,
+                                            time: data.timeStamp);
                                   });
                             }, error: (e, r) {
-                              return const Center(
-                                child: Text('no data'),
+                              return Center(
+                                child: Text(e.toString()),
                               );
                             }, loading: () {
                               return const Center(
                                 child: CircularProgressIndicator(),
                               );
-                            })
+                            }),
                           ])),
                       Container(
                         height: size.height * 0.1,
@@ -423,10 +420,11 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                 width: size.width * 0.4,
                                 height: size.height * 0.065,
                                 action: () async {
-                                  await _present!.addCheckin(
+                                  _present!.uUid();
+                                   _present!.addCheckin(
                                       user.email!,
-                                      format.formatTime(DateTime.now()),
-                                      format.formatDate(DateTime.now()));
+                                      _present!.formatTime(DateTime.now()),
+                                      _present!.formatDate(DateTime.now()));
                                 },
                                 colo: ColorUse.colorBf),
                             UserButton(
@@ -437,8 +435,8 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
                                 action: () async {
                                   await _present!.addCheckout(
                                       user.email!,
-                                      format.formatDate(DateTime.now()),
-                                      format.formatTime(DateTime.now()));
+                                      _present!.formatDate(DateTime.now()),
+                                      _present!.formatTime(DateTime.now()));
                                 },
                                 colo: ColorUse.colorBf),
                           ],
@@ -496,8 +494,8 @@ class _UserMainPageState extends ConsumerState<UserMainPage> {
             ),
             InkWell(
                 onTap: () async {
-                  await _log!.logOut(context, ref, box);
                   ref.read(stateauth.notifier).update((state) => 1);
+                  await _log!.logOut(context, ref, box);
                 },
                 child: const DrawerMenu(
                   icon: Icons.login_outlined,

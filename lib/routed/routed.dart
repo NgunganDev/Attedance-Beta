@@ -19,10 +19,8 @@ class Routed extends ConsumerStatefulWidget {
 
 class _RoutedState extends ConsumerState<Routed> {
   var box = Hive.box<Dbmodel>('boxname');
-  // final _keysc = GlobalKey()
-  // int state = 0;
   Widget routes(int stateit){
-    print('ohh');
+    // print('ohh');
     print(box.length);
     switch(stateit){
       case 0:

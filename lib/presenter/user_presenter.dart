@@ -1,10 +1,11 @@
 import 'package:attedancebeta/all_method/method_firebase.dart';
+import 'package:attedancebeta/format_parse/format.dart';
 import 'package:attedancebeta/state/state_manage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final present2 = Provider((ref) => Presentertwo(method: ref.read(stateinst)));
 
-class Presentertwo {
+class Presentertwo extends Format{
   final MethodFirebase method;
   Presentertwo({required this.method});
 
@@ -20,5 +21,14 @@ class Presentertwo {
   void userNow(String name){
     print(name);
     method.inputUser = name;
+  }
+
+  void timeDay(String time){
+    print(time);
+    method.inputTheTime = time;
+  }
+
+  void uUid(){
+    method.uuids = uuidFormat();
   }
 }

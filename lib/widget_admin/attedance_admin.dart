@@ -1,18 +1,21 @@
-import 'package:attedancebeta/color/color_const.dart';
 import 'package:flutter/material.dart';
 
-class AttedanceCard extends StatelessWidget {
+import '../color/color_const.dart';
+
+class AttedanceCardAdmin extends StatelessWidget {
   final String checkin;
   final String time;
   final String checkout;
   final Widget asset;
+  final VoidCallback action;
   final bool accept;
-  const AttedanceCard(
+  const AttedanceCardAdmin(
       {super.key,
       required this.checkout,
       required this.asset,
       required this.checkin,
       required this.time,
+      required this.action,
       required this.accept
       });
 
@@ -45,40 +48,42 @@ class AttedanceCard extends StatelessWidget {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  accept ?
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    alignment: Alignment.center,
-                    width: size.width * 0.28,
-                    height: size.height * 0.05,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: ColorUse.colorBf),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.check, color: Colors.white,),
-                          Text(
-                            'Accepted',
-                            style: TextStyle(color: ColorUse.colorText, fontWeight: FontWeight.w500, fontSize: size.height * 0.02),
-                          ),
-                        ],
-                      )) :  Container(
-                    padding: const EdgeInsets.all(4),
-                    alignment: Alignment.center,
-                    width: size.width * 0.28,
-                    height: size.height * 0.05,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Colors.grey),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.not_interested_outlined, color: Colors.white,),
-                          Text(
-                            'Not Yet',
-                            style: TextStyle(color: ColorUse.colorText, fontWeight: FontWeight.w500, fontSize: size.height * 0.02),
-                          ),
-                        ],
-                      )),
+                  InkWell(
+                    onTap: action,
+                    child: accept ? Container(
+                      padding: const EdgeInsets.all(4),
+                      alignment: Alignment.center,
+                      width: size.width * 0.28,
+                      height: size.height * 0.05,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: ColorUse.colorBf),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check, color: Colors.white,),
+                            Text(
+                              'Accepted',
+                              style: TextStyle(color: ColorUse.colorText, fontWeight: FontWeight.w500, fontSize: size.height * 0.02),
+                            ),
+                          ],
+                        )) : Container(
+                      padding: const EdgeInsets.all(4),
+                      alignment: Alignment.center,
+                      width: size.width * 0.28,
+                      height: size.height * 0.05,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.grey),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.not_interested_outlined, color: Colors.white,),
+                            Text(
+                              'Not Yet',
+                              style: TextStyle(color: ColorUse.colorText, fontWeight: FontWeight.w500, fontSize: size.height * 0.02),
+                            ),
+                          ],
+                        ))
+                  ),
                 ],
               ),
               Container(

@@ -2,10 +2,10 @@ import 'package:attedancebeta/color/color_const.dart';
 import 'package:attedancebeta/state/state_manage.dart';
 import 'package:attedancebeta/widget_control/button_control.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
 import '../model_db/hive_model.dart';
 import '../presenter/auth_presenter.dart';
 import '../widget_control/form_control.dart';
@@ -45,7 +45,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    // var box = Hive.box<Dbmodel>('boxname');
     final size = MediaQuery.sizeOf(context);
     return SingleChildScrollView(
       child: Container(
@@ -184,7 +183,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(18),
                                       color: ColorUse.colorText),
-                                  padding: EdgeInsets.symmetric(horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
                                   height: size.height * 0.08,
                                   width: size.width * 0.4,
                                 ),
@@ -202,11 +201,17 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Username',
-                            style: TextStyle(
-                                fontSize: size.height * 0.02,
-                                fontWeight: FontWeight.w600),
+                          InkWell(
+                            onTap:(){
+                              FirebaseAuth.instance.currentUser!.email != null ? print('ji') :
+                              print('no');
+                            } ,
+                            child: Text(
+                              'Username',
+                              style: TextStyle(
+                                  fontSize: size.height * 0.02,
+                                  fontWeight: FontWeight.w600),
+                            ),
                           ),
                           SizedBox(
                             height: size.height * 0.01,

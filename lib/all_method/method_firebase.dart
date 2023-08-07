@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:attedancebeta/routed/final_routed.dart';
+// import 'package:attedancebeta/routed/non_final_routed.dart';
 import 'package:attedancebeta/routed/routed.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,12 +11,13 @@ import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import '../format_parse/format.dart';
 import '../model_data/model_retrieve.dart';
+import '../model_data/model_retrieve_attedance.dart';
 import '../model_db/hive_model.dart';
 
 // perlu maintenance
 class MethodFirebase extends Format {
-  // MethodFirebase() : super();
   String _users = '';
+  String _inputTime = '';
   CollectionReference instansiRef =
       FirebaseFirestore.instance.collection('instansi');
 
@@ -25,6 +27,24 @@ class MethodFirebase extends Format {
 
   set inputUser(String user) {
     _users = user;
+  }
+
+  String get inputTime {
+    return _inputTime;
+  }
+
+  set inputTheTime(String time) {
+    _inputTime = time;
+  }
+
+  String _uuid = '';
+
+  set uuids(String val) {
+    _uuid = val;
+  }
+
+  String get uuid {
+    return _uuid;
   }
 
   Future<String> fetchIns() async {
@@ -63,13 +83,36 @@ class MethodFirebase extends Format {
     yield* data;
   }
 
-  Stream<QuerySnapshot> userAttedance() async* {
-    final data = instansiRef
+  Stream<List<ModelAttedance>> dateAttedance() async* {
+    // print(inputTime);
+    print(userr);
+    Stream<List<ModelAttedance>> data = instansiRef
         .doc(await fetchIns())
         .collection('users')
         .doc(userr)
         .collection('atpers')
-        .snapshots();
+        .snapshots()
+        .map((event) {
+      return event.docs.map((e) {
+        return ModelAttedance.fromSnapshot(e);
+      }).toList();
+    });
+
+    yield* data;
+  }
+
+  Stream<List<ModelAttedance>> todayAttedance(DateTime time) async* {
+    final String timeNow = formatDate(time);
+    var data = instansiRef
+        .doc(await fetchIns())
+        .collection('attedance')
+        .where('timestamp', isEqualTo: timeNow)
+        .snapshots()
+        .map((event) {
+      print(event);
+      return event.docs.map((e) => ModelAttedance.fromSnapshot(e)).toList();
+    });
+
     yield* data;
   }
 
@@ -95,21 +138,20 @@ class MethodFirebase extends Format {
 
   Future<void> signInEmail(String email, String password, BuildContext context,
       String nameInstansi) async {
+    // var box = Hive.box<Dbmodel>('boxname');
     await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) async {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const FinalRouted()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => FinalRouted()));
       await putins(nameInstansi);
     });
   }
 
   Future<void> signOut(BuildContext context, WidgetRef ref, Box box) async {
-    await FirebaseAuth.instance.signOut().then((value) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const Routed()));
-      // ref.read(stateauth.notifier).update((state) => 1);
-    });
+    await FirebaseAuth.instance.signOut().then((value) =>
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => const Routed())));
     box.clear();
   }
 
@@ -145,8 +187,16 @@ class MethodFirebase extends Format {
   }
 
   Future<void> addCheckIn(String user, String timestamp, String day) async {
-    await instansiRef.doc(await fetchIns()).collection('attedance').add(
-        {"checkIn": timestamp, "checkout": "", "user": user, "timestamp": day});
+    await instansiRef.doc(await fetchIns()).collection('attedance').add({
+      "checkIn": timestamp,
+      "checkout": "",
+      "noattendace": '',
+      "info": '',
+      "user": user,
+      "timestamp": day,
+      "uuid": uuid,
+      "accept": false
+    });
     await instansiRef
         .doc(await fetchIns())
         .collection('users')
@@ -158,7 +208,9 @@ class MethodFirebase extends Format {
       "noattendace": '',
       "info": '',
       "user": user,
-      "timestamp": day
+      "timestamp": day,
+      "uuid": uuid,
+      "accept": false
     });
   }
 
@@ -186,6 +238,26 @@ class MethodFirebase extends Format {
     for (var docTo in resAll.docs) {
       refAll.doc(docTo.id).update({"checkout": timeout});
     }
+  }
+
+  Future<void> acceptData(String idAtt, String idUser, bool condition, String uid) async {
+    CollectionReference ref = instansiRef
+        .doc(await fetchIns())
+        .collection('users')
+        .doc(idUser)
+        .collection('atpers');
+    CollectionReference refAll =
+        instansiRef.doc(await fetchIns()).collection('attedance');
+    await refAll.doc(idAtt).update({
+      "accept": condition,
+    }).then((value) async {
+      QuerySnapshot ups = await ref.where('uuid', isEqualTo: uid).get();
+      for (var data in ups.docs) {
+        await ref.doc(data.id).update({
+          "accept": condition,
+        });
+      }
+    });
   }
 
   Future<void> nonAttedance(String timestamp, String user, String day,

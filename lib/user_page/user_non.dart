@@ -4,21 +4,22 @@ import 'package:attedancebeta/widget_control/button_control.dart';
 import 'package:attedancebeta/widget_control/form_control.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 
-import '../format_parse/format.dart';
+import '../presenter/user_presenter.dart';
 
-class Usernon extends StatefulWidget {
+class Usernon extends ConsumerStatefulWidget {
   final String user;
   const Usernon({super.key, required this.user});
 
   @override
-  State<Usernon> createState() => _UsernonState();
+  ConsumerState<Usernon> createState() => _UsernonState();
 }
 
-class _UsernonState extends State<Usernon> {
+class _UsernonState extends ConsumerState<Usernon> {
   MethodFirebase method = MethodFirebase();
-  Format format = Format();
+  Presentertwo? _present;
   TextEditingController controlket = TextEditingController();
   String? select1;
   String? select2;
@@ -26,6 +27,14 @@ class _UsernonState extends State<Usernon> {
     'sakit',
     'ijin',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _present = ref.read(present2);
+    });
+  }
   @override
   void dispose() {
     super.dispose();
@@ -150,9 +159,9 @@ class _UsernonState extends State<Usernon> {
                 action: () async {
                   await method
                       .nonAttedance(
-                          format.formatTime(DateTime.now()),
+                          _present!.formatTime(DateTime.now()),
                           widget.user,
-                          format.formatDate(DateTime.now()),
+                          _present!.formatDate(DateTime.now()),
                           select1!,
                           controlket.text)
                       .then((val) {

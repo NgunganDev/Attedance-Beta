@@ -1,8 +1,6 @@
-import 'package:attedancebeta/all_method/method_firebase.dart';
 import 'package:attedancebeta/color/color_const.dart';
 import 'package:attedancebeta/popup/show.dart';
 import 'package:attedancebeta/state/state_manage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
@@ -22,8 +20,7 @@ class UserProfile extends ConsumerStatefulWidget {
 class _UserProfileState extends ConsumerState<UserProfile> {
   TextEditingController updatebio = TextEditingController();
   TextEditingController updateUsername = TextEditingController();
-  Presenterone?_present;
-  User user = FirebaseAuth.instance.currentUser!;
+  Presenterone? _present;
   var box = Hive.box<Dbmodel>('boxname');
   ShowPop showit = ShowPop();
   String imgUrle = '';
@@ -35,6 +32,7 @@ class _UserProfileState extends ConsumerState<UserProfile> {
       _present = ref.read(present);
     });
   }
+
   @override
   void dispose() {
     super.dispose();
@@ -43,9 +41,8 @@ class _UserProfileState extends ConsumerState<UserProfile> {
 
   @override
   Widget build(BuildContext context) {
-    final watchUser = ref.watch(streamUser);
+    // final watchUser = ref.watch(streamUser);
     final watchModel = ref.watch(streamModel);
-    MethodFirebase method = MethodFirebase();
     Dbmodel instansi = box.getAt(0)!;
     final size = MediaQuery.sizeOf(context);
     return Scaffold(
@@ -61,109 +58,99 @@ class _UserProfileState extends ConsumerState<UserProfile> {
             Container(
               width: size.width * 0.8,
               height: size.height * 0.2,
-              child: watchUser.when(data: (datas){
+              child: watchModel.when(data: (datas) {
                 return Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          InkWell(
-                            onTap: () async {
-                              await _present!.updatePic(instansi.instansiName, user.email!);
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () async {
+                        await _present!
+                            .updatePic(instansi.instansiName, _present!.user);
+                      },
+                      child: CircleAvatar(
+                        radius: size.height * 0.05,
+                        backgroundImage: NetworkImage(datas.photoUrl),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: size.width * 0.08,
+                        ),
+                        Text(
+                          datas.userName,
+                          style: TextStyle(
+                              fontSize: size.height * 0.035,
+                              fontWeight: FontWeight.w500),
+                        ),
+                        IconButton(
+                            onPressed: () async {
+                              showit.showUp(context, () async {
+                                await _present!
+                                    .updateUname(
+                                        _present!.user, updateUsername.text)
+                                    .then((value) {
+                                  Navigator.pop(context);
+                                });
+                              }, 'username', updateUsername, 'name');
                             },
-                            child: CircleAvatar(
-                              radius: size.height * 0.05,
-                              backgroundImage: NetworkImage(datas['photoUrl']),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                height: size.width * 0.08,
-                              ),
-                              Text(
-                                datas['username'],
-                                style: TextStyle(
-                                    fontSize: size.height * 0.035,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              IconButton(
-                                  onPressed: () async {
-                                    showit.showUp(context, () async {
-                                      // await method.updateUsername(user.email!, updateUsername.text).then((value) {
-                                      //   Navigator.pop(context);
-                                      // });
-                                      await _present!.updateUname(user.email!, updateUsername.text).then((value) {
-                                        Navigator.pop(context);
-                                      });
-                                    },
-                                     'username', updateUsername, 'name');
-                                  },
-                                  icon: const Icon(Icons.mode_edit_sharp))
-                            ],
-                          ),
-                        ],
-                      );
-              }, error: (e,r){
+                            icon: const Icon(Icons.mode_edit_sharp))
+                      ],
+                    ),
+                  ],
+                );
+              }, error: (e, r) {
                 return const Center(
                   child: Text('error page'),
                 );
-              }, loading: (){
+              }, loading: () {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               }),
             ),
-            watchUser.when(data: (data){
-              return  Container(
-                      width: size.width * 0.8,
-                      height: size.height * 0.15,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
+            //
+            watchModel.when(data: (datas) {
+              return Container(
+                width: size.width * 0.8,
+                height: size.height * 0.15,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Your Bio',
+                      style: TextStyle(
+                          fontSize: size.height * 0.03,
+                          fontWeight: FontWeight.w400),
+                    ),
+                    Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Your Bio',
-                            style: TextStyle(
-                                fontSize: size.height * 0.03,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          Container(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(data['bio']),
-                                IconButton(
-                                    onPressed: () {
-                                      showit.showUp(context, () async {
-                                        await method.updateBioname(
-                                            user.email!, updatebio.text);
-                                      }, 'Update Bio', updatebio, 'bio');
-                                      updatebio.clear();
-                                    },
-                                    icon: const Icon(Icons.edit)),
-                              ],
-                            ),
-                          )
+                          Text(datas.bio),
+                          IconButton(
+                              onPressed: () {
+                                showit.showUp(context, () async {
+                                  await _present!.updateBio(
+                                      _present!.user, updatebio.text);
+                                }, 'Update Bio', updatebio, 'bio');
+                                updatebio.clear();
+                              },
+                              icon: const Icon(Icons.edit)),
                         ],
                       ),
-                    );
-            }, error: (e,r){
-              return const Center();
-            }, loading: (){
-              return const Center(
-                child: CircularProgressIndicator(),
+                    ),
+                  ],
+                ),
               );
-            }),
-            watchModel.when(data: (datas){
-              return Center(
-                child: Text(datas.userName),
-              );
-            }, error: (e,r){
+            }, error: (e, r) {
               return const Center(
                 child: Text('no data'),
               );
-            }, loading: (){
+            }, loading: () {
               return const Center(
                 child: CircularProgressIndicator(),
               );

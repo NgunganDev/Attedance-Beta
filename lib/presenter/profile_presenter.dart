@@ -25,4 +25,8 @@ class Presenterone {
     return name;
   }
 
+  String get user {
+    return method.userr;
+  }
+
  }

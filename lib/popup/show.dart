@@ -4,7 +4,7 @@ import 'package:attedancebeta/widget_control/form_control.dart';
 import 'package:flutter/material.dart';
 import '../format_parse/format.dart';
 
-class ShowPop {
+class ShowPop extends Format{
   Future<String> caleresString(BuildContext context) async {
     String pickedDate = '';
    await showDatePicker(
@@ -13,7 +13,7 @@ class ShowPop {
             firstDate: DateTime(2000),
             lastDate: (DateTime.now()).add(const Duration(days: 7)))
         .then((value) {
-      pickedDate = Format().formatDate(value!);
+      pickedDate = formatDate(value!);
       print(pickedDate);
     });
     return pickedDate;

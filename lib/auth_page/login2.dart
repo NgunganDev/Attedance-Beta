@@ -1,4 +1,5 @@
 import 'package:attedancebeta/state/state_manage.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,9 +18,15 @@ class LoginDendam extends ConsumerStatefulWidget {
 
 class _LoginDendamState extends ConsumerState<LoginDendam> {
   final _controlEmail = TextEditingController();
-  final _controlInstansi = TextEditingController();
+  // final _controlInstansi = TextEditingController();
   final _controlPassword = TextEditingController();
   Presenterthree? _present;
+  final itemsInstansi = [
+    'Instansi 1',
+    'Instansi 2',
+    'Instansi 3'
+  ];
+  String? _selectInstansi;
   User? user;
   @override
   void initState() {
@@ -28,7 +35,7 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
     _present = ref.read(presentre);
     if (user != null) {
       // ref.read(stateUser.notifier).update((state) => user!.email);
-      Future.delayed(const Duration(seconds: 1), () {
+      Future.delayed(const Duration(milliseconds: 200), () {
         // ref.read(stateUser.notifier).state = user!.email.toString();
         //  ref.read(stateUser.notifier).update((state) { return user!.email.toString();});
         Navigator.pushReplacement(context,
@@ -163,13 +170,47 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
                           SizedBox(
                             height: size.height * 0.01,
                           ),
-                          FormControl(
-                              colors: ColorUse.colorText,
-                              widths: size.width * 0.85,
-                              heights: size.height * 0.098,
-                              hint: 'instansi',
-                              controlit: _controlInstansi,
-                              icon: Icons.password_sharp),
+                          DropdownButtonHideUnderline(
+                              child: DropdownButton2<String>(
+                                isExpanded: true,
+                                hint: Text(
+                                  'Instansi',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                ),
+                                items: itemsInstansi
+                                    .map((String item) =>
+                                        DropdownMenuItem<String>(
+                                          value: item,
+                                          child: Text(
+                                            item,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ))
+                                    .toList(),
+                                value: _selectInstansi,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    _selectInstansi = value;
+                                  });
+                                },
+                                buttonStyleData: ButtonStyleData(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(18),
+                                      color: ColorUse.colorText),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  height: size.height * 0.09,
+                                  width: size.width * 0.8,
+                                ),
+                                menuItemStyleData: const MenuItemStyleData(
+                                  height: 50,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                       SizedBox(
@@ -204,10 +245,7 @@ class _LoginDendamState extends ConsumerState<LoginDendam> {
                                 _controlEmail.text,
                                 _controlPassword.text,
                                 context,
-                                _controlInstansi.text);
-                            _controlEmail.clear();
-                            _controlPassword.clear();
-                            _controlInstansi.clear();
+                                _selectInstansi!);
                           },
                           size: size)
                     ],

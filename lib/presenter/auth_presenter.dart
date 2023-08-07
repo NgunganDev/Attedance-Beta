@@ -23,4 +23,8 @@ class Presenterthree {
   Future<void> logOut(BuildContext context, WidgetRef ref, Box box) async {
     await method.signOut(context, ref, box);
   }
+
+  String userIn(){
+    return method.userr;
+  }
 }
