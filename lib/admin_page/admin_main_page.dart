@@ -1,3 +1,4 @@
+import 'package:attedancebeta/admin_page/chart_week.dart';
 import 'package:attedancebeta/color/color_const.dart';
 import 'package:attedancebeta/state/state_manage.dart';
 import 'package:attedancebeta/widget_admin/attedance_admin.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
+import '../data_representation/data_r.dart';
 import '../model_data/model_retrieve_attedance.dart';
 import '../model_db/hive_model.dart';
 import '../presenter/admin_presenter.dart';
@@ -34,7 +36,17 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
       return false;
     }
   }
+
   List<ModelAttedance> _privList = [];
+
+  // void dayData(){
+  //   var datas = [];
+  //   for(var i = 0; i < 7; i++){
+  //     _privList.where((element) {
+  //     });
+  //     print(datas);
+  //   }
+  // }
 
   @override
   void initState() {
@@ -50,7 +62,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
     final watchTime = ref.watch(stateTime);
     final watchAdmin = ref.watch(streamModel);
     final watchToday = ref.watch(streamTodayAtt);
-    final watchChart = ref.watch(streamBarAtedance);
+    // final watchChart = ref.watch(streamBarAtedance);
     final size = MediaQuery.sizeOf(context);
     return Scaffold(
       body: Container(
@@ -160,12 +172,12 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                                 name: 'Today', condition: checkPage(0))),
                         InkWell(
                             onTap: () {
-                              final timeNow = Timestamp.now();
-                              final startWeek = timeNow.toDate().subtract(
-                                  Duration(days: timeNow.toDate().weekday - 1));
-                              final endWeek = timeNow.toDate().add(
-                                  Duration(days: 7 - timeNow.toDate().weekday));
-                                  // print(startWeek);
+                              // final timeNow = Timestamp.now();
+                              // final startWeek = timeNow.toDate().subtract(
+                              //     Duration(days: timeNow.toDate().weekday - 1));
+                              // final endWeek = timeNow.toDate().add(
+                              //     Duration(days: 7 - timeNow.toDate().weekday));
+                              //     // print(startWeek);
                               controlPage.jumpToPage(1);
                             },
                             child: MiniButton(
@@ -185,6 +197,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                           physics: const NeverScrollableScrollPhysics(),
                           children: [
                             watchToday.when(data: (datas) {
+                              // print(datas.length);
                               return AnimationLimiter(
                                 child: ListView.builder(
                                   itemCount: datas.length,
@@ -251,58 +264,56 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                                 child: CircularProgressIndicator(),
                               );
                             }),
-                            watchToday.when(data: (data){
-                                final timeNow = Timestamp.now();
+                            watchToday.when(data: (data) {
+                              List<ModelAttedance> sortedData = _privList
+                                ..sort((a, b) => a.realtime
+                                    .toDate()
+                                    .compareTo(b.realtime.toDate()));
+                              print(data.length);
+                              final timeNow = Timestamp.now();
                               final startWeek = timeNow.toDate().subtract(
-                                  Duration(days: timeNow.toDate().weekday - 2));
+                                  Duration(days: timeNow.toDate().weekday - 1));
                               final endWeek = timeNow.toDate().add(
                                   Duration(days: 7 - timeNow.toDate().weekday));
-                                  print(startWeek);
-                                  print(endWeek);
-                                  _privList = 
-                                  data.where((elem){
-                                    print(elem.realtime.toDate());
-                                    // return elem.noAttedance == '';
-                                    return elem.realtime.toDate().isAfter(startWeek) || elem.realtime.toDate().isBefore(endWeek);
-                                  } ).toList();
-                                  print(_privList.length);
-                              return ListView.builder(
-                                itemCount: _privList.length,
-                                itemBuilder: (_, index){
-                                  return Text(_privList[index].user);
-                              });
-                            }, error: (e,r){
+                              _privList = data.where((elem) {
+                                print(elem.realtime.toDate());
+                                return elem.realtime
+                                        .toDate()
+                                        .isAfter(startWeek) &&
+                                    elem.realtime.toDate().isBefore(endWeek);
+                              }).toList();
+                              Representation dataR =
+                                  Representation(listOf: _privList);
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: size.height * 0.02,
+                                  ),
+                                  Text(
+                                    'Grafik Mingguan',
+                                    style: TextStyle(
+                                        fontSize: size.height * 0.04,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  SizedBox(
+                                    height: size.height * 0.02,
+                                  ),
+                                  SizedBox(
+                                      width: size.width,
+                                      height: size.height * 0.25,
+                                      child: ChartWeek(
+                                        listData: sortedData,
+                                        dataD: dataR,
+                                      )),
+                                ],
+                              );
+                            }, error: (e, r) {
                               return Text(e.toString());
-                            }, loading: (){
-                              return const Center(child: CircularProgressIndicator());
-                            })                            
-                            // watchChart.when(data: (data) {
-                            //   print('${data.length} item');
-                            //   return AnimationLimiter(
-                            //     child: ListView.builder(
-                            //       itemCount: data.length,
-                            //       itemBuilder:
-                            //           (BuildContext context, int index) {
-                            //         return AnimationConfiguration.staggeredList(
-                            //           position: index,
-                            //           duration:
-                            //               const Duration(milliseconds: 375),
-                            //           child: SlideAnimation(
-                            //             verticalOffset: 50.0,
-                            //             child: FadeInAnimation(
-                            //                 child: Text(data[index].user)),
-                            //           ),
-                            //         );
-                            //       },
-                            //     ),
-                            //   );
-                            // }, error: (e, r) {
-                            //   return Text(e.toString());
-                            // }, loading: () {
-                            //   return const Center(
-                            //     child: CircularProgressIndicator(),
-                            //   );
-                            // })
+                            }, loading: () {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            })
                           ]),
                     ),
                   ],
