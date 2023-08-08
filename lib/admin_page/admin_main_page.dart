@@ -1,4 +1,4 @@
-import 'package:attedancebeta/admin_page/chart_week.dart';
+import 'package:attedancebeta/admin_page/chart_admin/chart_week.dart';
 import 'package:attedancebeta/color/color_const.dart';
 import 'package:attedancebeta/state/state_manage.dart';
 import 'package:attedancebeta/widget_admin/attedance_admin.dart';
@@ -10,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
-import '../data_representation/data_r.dart';
 import '../model_data/model_retrieve_attedance.dart';
 import '../model_db/hive_model.dart';
 import '../presenter/admin_presenter.dart';
@@ -39,15 +38,6 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
 
   List<ModelAttedance> _privList = [];
 
-  // void dayData(){
-  //   var datas = [];
-  //   for(var i = 0; i < 7; i++){
-  //     _privList.where((element) {
-  //     });
-  //     print(datas);
-  //   }
-  // }
-
   @override
   void initState() {
     setState(() {
@@ -62,6 +52,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
     final watchTime = ref.watch(stateTime);
     final watchAdmin = ref.watch(streamModel);
     final watchToday = ref.watch(streamTodayAtt);
+    final watchAttedance = ref.watch(streamallAttedance);
     // final watchChart = ref.watch(streamBarAtedance);
     final size = MediaQuery.sizeOf(context);
     return Scaffold(
@@ -137,6 +128,9 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    SizedBox(
+                      height: size.height * 0.02,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -161,6 +155,9 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                         )
                       ],
                     ),
+                    SizedBox(
+                      height: size.height * 0.03,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -172,12 +169,6 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                                 name: 'Today', condition: checkPage(0))),
                         InkWell(
                             onTap: () {
-                              // final timeNow = Timestamp.now();
-                              // final startWeek = timeNow.toDate().subtract(
-                              //     Duration(days: timeNow.toDate().weekday - 1));
-                              // final endWeek = timeNow.toDate().add(
-                              //     Duration(days: 7 - timeNow.toDate().weekday));
-                              //     // print(startWeek);
                               controlPage.jumpToPage(1);
                             },
                             child: MiniButton(
@@ -264,7 +255,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                                 child: CircularProgressIndicator(),
                               );
                             }),
-                            watchToday.when(data: (data) {
+                            watchAttedance.when(data: (data) {
                               List<ModelAttedance> sortedData = _privList
                                 ..sort((a, b) => a.realtime
                                     .toDate()
@@ -276,38 +267,19 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                               final endWeek = timeNow.toDate().add(
                                   Duration(days: 7 - timeNow.toDate().weekday));
                               _privList = data.where((elem) {
-                                print(elem.realtime.toDate());
+                                // print(elem.realtime.toDate());
                                 return elem.realtime
                                         .toDate()
                                         .isAfter(startWeek) &&
                                     elem.realtime.toDate().isBefore(endWeek);
                               }).toList();
-                              Representation dataR =
-                                  Representation(listOf: _privList);
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    height: size.height * 0.02,
-                                  ),
-                                  Text(
-                                    'Grafik Mingguan',
-                                    style: TextStyle(
-                                        fontSize: size.height * 0.04,
-                                        fontWeight: FontWeight.w500),
-                                  ),
-                                  SizedBox(
-                                    height: size.height * 0.02,
-                                  ),
-                                  SizedBox(
-                                      width: size.width,
-                                      height: size.height * 0.25,
-                                      child: ChartWeek(
-                                        listData: sortedData,
-                                        dataD: dataR,
-                                      )),
-                                ],
-                              );
+                              // _present!.setList(_privList);
+                              return SizedBox(
+                                  width: size.width,
+                                  height: size.height * 0.3,
+                                  child: ChartWeek(
+                                    listData: sortedData,
+                                  ));
                             }, error: (e, r) {
                               return Text(e.toString());
                             }, loading: () {

@@ -1,4 +1,5 @@
 import 'package:attedancebeta/all_method/method_firebase.dart';
+import 'package:attedancebeta/data_representation/data_r.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../model_data/model_retrieve.dart';
@@ -7,6 +8,7 @@ import '../model_data/model_retrieve_attedance.dart';
 StateProvider stateauth = StateProvider<int>((ref) => 0);
 StateProvider stateTime = StateProvider<DateTime>((ref) => DateTime.now());
 final stateinst = Provider<MethodFirebase>((ref) => MethodFirebase());
+final dataRes = Provider<Representation>((ref) => Representation());
 
 final streamUser = StreamProvider.autoDispose<DocumentSnapshot>((ref) {
   final present = ref.watch(stateinst);
@@ -29,7 +31,12 @@ final streamTodayAtt = StreamProvider.autoDispose((ref) {
   return present.todayAttedance(time);
 });
 
-final streamBarAtedance = StreamProvider.autoDispose((ref) {
+final streamallAttedance = StreamProvider.autoDispose<List<ModelAttedance>>((ref) {
   final present = ref.watch(stateinst);
-  return present.adminBarChart();
+  return present.allAttedance();
 });
+
+// final streamBarAtedance = StreamProvider.autoDispose((ref) {
+//   final present = ref.watch(stateinst);
+//   return present.adminBarChart();
+// });

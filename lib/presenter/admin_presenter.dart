@@ -3,10 +3,14 @@ import 'package:attedancebeta/popup/show.dart';
 import 'package:attedancebeta/state/state_manage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final presenterFour = Provider<PresenterAdmin>((ref) => PresenterAdmin(method: ref.read(stateinst)));
+import '../data_representation/data_r.dart';
+import '../model_data/model_retrieve_attedance.dart';
+
+final presenterFour = Provider<PresenterAdmin>((ref) => PresenterAdmin(method: ref.read(stateinst), dataR: ref.read(dataRes)));
 class PresenterAdmin extends ShowPop{
   final MethodFirebase method;
-  PresenterAdmin({required this.method});
+  final Representation dataR;
+  PresenterAdmin({required this.method, required this.dataR});
 
   String _timeIs = '';
   String userNow(){
@@ -29,5 +33,25 @@ String get timeOn{
   Future<String> calendarCall(context, WidgetRef ref) async {
     return await caleresString(context, ref);
   }
+
+void setList(List<ModelAttedance> val){
+  dataR.listTo = val;
+}
+
+List<ModelAttedance> get listThe{
+  return dataR.listOf;
+}
+
+List<List<ModelAttedance>> get dayList{
+  return [
+    dataR.mondayData(),
+    dataR.tueData(),
+    dataR.wedData(),
+    dataR.thuData(),
+    dataR.friData(),
+    dataR.satData(),
+    dataR.sunData()
+  ];
+}
 
 }

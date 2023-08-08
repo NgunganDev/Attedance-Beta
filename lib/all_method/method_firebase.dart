@@ -115,23 +115,31 @@ class MethodFirebase extends Format {
     yield* data;
   }
 
-  Stream<List<ModelAttedance>> adminBarChart() async* {
-    final timeNow = Timestamp.now();
-    final startWeek = timeNow.toDate().subtract(Duration(days: timeNow.toDate().weekday - 1));
-    print(startWeek);
-    final endWeek = timeNow.toDate().add(Duration(days: 7 - timeNow.toDate().weekday));
-    var data = instansiRef
-        .doc(await fetchIns())
-        .collection('attedance')
-        .where('realtime', isGreaterThanOrEqualTo: startWeek)
-        .where('realtime', isLessThan: endWeek)
-        .snapshots()
-        .map((event) {
+  Stream<List<ModelAttedance>> allAttedance() async* {
+    final data = instansiRef.doc(await fetchIns()).collection('attedance').snapshots().map((event) {
       return event.docs.map((e) => ModelAttedance.fromSnapshot(e)).toList();
     });
 
     yield* data;
   }
+
+  // Stream<List<ModelAttedance>> adminBarChart() async* {
+  //   final timeNow = Timestamp.now();
+  //   final startWeek = timeNow.toDate().subtract(Duration(days: timeNow.toDate().weekday - 1));
+  //   print(startWeek);
+  //   final endWeek = timeNow.toDate().add(Duration(days: 7 - timeNow.toDate().weekday));
+  //   var data = instansiRef
+  //       .doc(await fetchIns())
+  //       .collection('attedance')
+  //       .where('realtime', isGreaterThanOrEqualTo: startWeek)
+  //       .where('realtime', isLessThan: endWeek)
+  //       .snapshots()
+  //       .map((event) {
+  //     return event.docs.map((e) => ModelAttedance.fromSnapshot(e)).toList();
+  //   });
+
+  //   yield* data;
+  // }
 
   ImagePicker imagepicker = ImagePicker();
   Future<void> signUpEmail(String email, String password, String username,
