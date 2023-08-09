@@ -53,7 +53,6 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
     final watchAdmin = ref.watch(streamModel);
     final watchToday = ref.watch(streamTodayAtt);
     final watchAttedance = ref.watch(streamallAttedance);
-    // final watchChart = ref.watch(streamBarAtedance);
     final size = MediaQuery.sizeOf(context);
     return Scaffold(
       body: Container(
@@ -260,7 +259,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                                 ..sort((a, b) => a.realtime
                                     .toDate()
                                     .compareTo(b.realtime.toDate()));
-                              print(data.length);
+                              // print(data.length);
                               final timeNow = Timestamp.now();
                               final startWeek = timeNow.toDate().subtract(
                                   Duration(days: timeNow.toDate().weekday - 1));

@@ -296,7 +296,10 @@ class MethodFirebase extends Format {
       "info": info,
       "checkout": "",
       "user": user,
-      "timestamp": day
+      "timestamp": day,
+      "uuid": uuid,
+      "accept": false,
+      "realtime": DateTime.now()
     });
     await instansiRef
         .doc(await fetchIns())
@@ -309,7 +312,10 @@ class MethodFirebase extends Format {
       "noattendace": non,
       "info": info,
       "user": user,
-      "timestamp": day
+      "timestamp": day,
+      "uuid": uuid,
+      "accept": false,
+      "realtime": DateTime.now()
     });
   }
 

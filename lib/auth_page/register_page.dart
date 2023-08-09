@@ -284,7 +284,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                   ref
                                       .read(stateauth.notifier)
                                       .update((state) => 0);
-                                      print(box.length);
+                                      // print(box.length);
                                 },
                                 child: Text('Already Have an Account'))
                           ],
@@ -304,19 +304,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                 type!, context);
                                 print(box.length);
                           },
-                          // action: () async {
-                          //    await box
-                          //       .add(Dbmodel(instansiName: selectedValue2!));
-                          //    _method.signupemail(
-                          //       _controlemails.text,
-                          //       _controlpasswords.text,
-                          //       _controluser.text,
-                          //       selectedValue2!,
-                          //       type!);
-                          //   _controlemails.clear();
-                          //   _controlpasswords.clear();
-                          //   _controluser.clear();
-                          // },
                           size: size)
                     ],
                   ),
