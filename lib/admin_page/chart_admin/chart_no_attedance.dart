@@ -25,7 +25,7 @@ class _ChartNoAttedanceState extends ConsumerState<ChartNoAttedance> {
           tooltipBgColor: Colors.white,
           getTooltipItem: (group, groupIndex, rod, rodIndex) {
             return BarTooltipItem('${rod.toY.toInt()} orang',
-                TextStyle(color: Colors.black, fontSize: 20));
+               const TextStyle(color: Colors.black, fontSize: 20));
           },
         ),
       );

@@ -1,7 +1,9 @@
 import 'package:attedancebeta/admin_page/chart_admin/chart_week.dart';
 import 'package:attedancebeta/color/color_const.dart';
+import 'package:attedancebeta/drawer_user/drawer_menu.dart';
 import 'package:attedancebeta/state/state_manage.dart';
 import 'package:attedancebeta/widget_admin/attedance_admin.dart';
+import 'package:attedancebeta/widget_admin/drawer_header_admin.dart';
 import 'package:attedancebeta/widget_admin/mini_button.dart';
 import 'package:attedancebeta/widget_user/user_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -25,6 +27,7 @@ class AdminMainPage extends ConsumerStatefulWidget {
 class _AdminMainPageState extends ConsumerState<AdminMainPage> {
   PresenterAdmin? _present;
   Presenterthree? _pres;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   var box = Hive.box<Dbmodel>('boxname');
   int pageIndex = 0;
   PageController controlPage = PageController();
@@ -55,6 +58,7 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
     final watchAttedance = ref.watch(streamallAttedance);
     final size = MediaQuery.sizeOf(context);
     return Scaffold(
+      key: _scaffoldKey,
       body: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
@@ -82,8 +86,8 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                            onPressed: () async {
-                              await _pres!.logOut(context, ref, box);
+                            onPressed: ()  {
+                               _scaffoldKey.currentState?.openDrawer();
                             },
                             icon: const Icon(
                               Icons.menu_outlined,
@@ -293,6 +297,47 @@ class _AdminMainPageState extends ConsumerState<AdminMainPage> {
             ],
           ),
         ]),
+      ),
+      drawer: Drawer(
+        child: watchAdmin.when(data: (data) {
+          return ListView(
+            children: [
+              Container(
+                child: Column(
+                  children: [
+                    DrawerHeaderAdmin(
+                      name: data.userEmail,
+                      imageUrl: data.photoUrl,
+                    )
+                  ],
+                ),
+              ),
+              const DrawerMenu(
+                  icon: Icons.new_releases_outlined,
+                  name: 'Info',
+                  icColor: Colors.grey),
+              const DrawerMenu(
+                  icon: Icons.monetization_on_outlined,
+                  name: 'Salary',
+                  icColor: Colors.green),
+              InkWell(
+                onTap: () async {
+                  await _pres!.logOut(context, ref, box);
+                },
+                child: const DrawerMenu(
+                    icon: Icons.logout_outlined,
+                    name: 'LogOut',
+                    icColor: Colors.black),
+              ),
+            ],
+          );
+        }, error: (e, r) {
+          return Text(e.toString());
+        }, loading: () {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }),
       ),
     );
   }
